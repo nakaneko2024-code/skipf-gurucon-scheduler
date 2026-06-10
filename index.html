@@ -1,0 +1,2420 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkipF グルコン スケジュール入力</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-theme:   #cbe3ff;
+      --color-accent1: #fff9b0;
+      --color-accent2: #3995a3;
+      --color-text:    #2a2a2a;
+      --color-muted:   #6b7280;
+      --color-white:   #ffffff;
+      --color-bg:      #f0f6ff;
+      --color-border:  #d1e8ff;
+      --radius-card:   16px;
+      --radius-btn:    10px;
+      --radius-bubble: 0 14px 14px 14px;
+      --font-main: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+      --shadow-card: 0 2px 10px rgba(57, 149, 163, 0.10);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 520px; margin: 0 auto; padding: 16px; }
+
+    .page-header {
+      background: var(--color-theme);
+      padding: 20px 24px 16px;
+      text-align: center;
+      border-bottom: 2px solid var(--color-border);
+    }
+    .page-header h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--color-accent2);
+    }
+    .event-date { font-size: 1.4rem; font-weight: 700; margin-top: 4px; }
+    .deadline-badge {
+      display: inline-block;
+      background: var(--color-accent1);
+      border: 1px solid #e6d900;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-top: 8px;
+      color: #5a5200;
+    }
+
+    .card {
+      background: var(--color-white);
+      border-radius: var(--radius-card);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 16px;
+      border: 1px solid var(--color-border);
+    }
+    .card-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 6px;
+    }
+
+    .bubbles { display: flex; flex-direction: column; gap: 10px; }
+    .bubble { display: flex; align-items: flex-start; gap: 10px; }
+    .bubble-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--color-accent2);
+      color: var(--color-white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .bubble-body {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-bubble);
+      padding: 8px 12px;
+      flex: 1;
+    }
+    .bubble-name { font-size: 0.72rem; color: var(--color-muted); margin-bottom: 2px; }
+    .bubble-text { font-size: 0.9rem; }
+    .bubble-indicator { margin-left: 6px; }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-muted);
+      margin-bottom: 5px;
+    }
+    .field input[type="text"],
+    .field input[type="date"] {
+      width: 100%;
+      padding: 9px 13px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+      background: var(--color-white);
+    }
+    .field input:focus { border-color: var(--color-accent2); }
+
+    .radio-group { display: flex; gap: 10px; }
+    .radio-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      transition: all 0.15s;
+      background: var(--color-white);
+      user-select: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .radio-btn.selected {
+      border-color: var(--color-accent2);
+      background: var(--color-theme);
+      color: var(--color-accent2);
+      font-weight: 600;
+    }
+
+    .time-row { display: flex; align-items: center; gap: 8px; }
+    .time-row input[type="text"] {
+      width: 90px;
+      padding: 9px;
+      text-align: center;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .time-row input[type="text"]:focus { border-color: var(--color-accent2); }
+    .time-row .sep { color: var(--color-muted); font-size: 0.9rem; }
+
+    .forecast {
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+    }
+    .forecast.green  { background: #f0fdf4; border: 1.5px solid #86efac; }
+    .forecast.yellow { background: #fffbeb; border: 1.5px solid #fcd34d; }
+    .forecast.red    { background: #fef2f2; border: 1.5px solid #fca5a5; }
+    .forecast-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .forecast-text { font-size: 0.84rem; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      background: var(--color-accent2);
+      color: var(--color-white);
+      border: none;
+      border-radius: var(--radius-btn);
+      font-family: var(--font-main);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.15s;
+      margin-top: 10px;
+    }
+    .btn-primary:hover    { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 11px;
+      background: var(--color-white);
+      color: var(--color-accent2);
+      border: 1.5px solid var(--color-accent2);
+      border-radius: var(--radius-btn);
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+      margin-top: 8px;
+    }
+    .btn-secondary:hover { background: var(--color-theme); }
+
+    .admin-section {
+      background: var(--color-white);
+      border-radius: var(--radius-card);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 16px;
+      border-top: 3px solid var(--color-accent2);
+      border-left: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .admin-badge {
+      display: inline-block;
+      background: var(--color-theme);
+      color: var(--color-accent2);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      letter-spacing: 0.06em;
+    }
+
+    .schedule-list {
+      margin-top: 12px;
+      background: var(--color-bg);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.84rem;
+      line-height: 2;
+    }
+    .schedule-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .schedule-row:last-child { border-bottom: none; }
+    .status-ok   { color: #16a34a; font-weight: 600; }
+    .status-warn { color: #b45309; font-weight: 600; }
+
+    .login-row { display: flex; gap: 8px; margin-top: 8px; }
+    .login-row input[type="password"] {
+      flex: 1;
+      padding: 9px 13px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 8px;
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .login-row input[type="password"]:focus { border-color: var(--color-accent2); }
+    .login-row button {
+      padding: 9px 18px;
+      background: var(--color-accent2);
+      color: var(--color-white);
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-main);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .settings-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .settings-row .field { margin-bottom: 0; flex: 1; min-width: 120px; }
+
+    .out-of-period {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--color-muted);
+      font-size: 0.95rem;
+      line-height: 2.2;
+    }
+    .out-of-period .icon {
+      font-size: 1.8rem;
+      display: block;
+      margin-bottom: 10px;
+      color: var(--color-accent2);
+    }
+
+    .hidden { display: none !important; }
+    .text-muted { color: var(--color-muted); font-size: 0.82rem; }
+    .mt-8 { margin-top: 8px; }
+    .count-badge {
+      display: inline-block;
+      background: var(--color-accent1);
+      border: 1px solid #e6d900;
+      color: #5a5200;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 1px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+    }
+
+    /* ══ タブナビゲーション ══════════════════════ */
+    .tab-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .tab-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+    .tab-btn {
+      padding: 7px 18px;
+      border: 1.5px solid rgba(255,255,255,0.6);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.35);
+      color: var(--color-accent2);
+      font-family: var(--font-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.3;
+    }
+    .tab-btn.active {
+      background: var(--color-accent2);
+      color: var(--color-white);
+      border-color: var(--color-accent2);
+    }
+    .tab-btn .tab-date {
+      font-size: 0.68rem;
+      font-weight: 500;
+      opacity: 0.85;
+      letter-spacing: 0;
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ══ 発表バナー ══════════════════════════════ */
+    .announcement-banner {
+      background: var(--color-accent1);
+      border: 1.5px solid #e6d900;
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin: 10px 16px 0;
+      font-size: 0.86rem;
+      color: #5a5200;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    /* ══ 投票グリッド ════════════════════════════ */
+    .vote-grid-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -4px;
+      padding: 0 4px 4px;
+    }
+    .vote-grid {
+      display: grid;
+      grid-template-columns: 38px repeat(16, 30px);
+      gap: 1px;
+      background: var(--color-border);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      min-width: fit-content;
+    }
+    .vote-grid-hdr {
+      height: 26px;
+      background: var(--color-theme);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--color-accent2);
+    }
+    .vote-grid-day {
+      height: 28px;
+      background: var(--color-white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--color-muted);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .vote-cell {
+      height: 28px;
+      background: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+      position: relative;
+    }
+    .vote-cell.state-o { background: #a8d8ff; }
+    .vote-cell.state-d { background: #fff0a0; }
+    .vote-cell .cell-state {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: #999;
+      line-height: 1;
+    }
+    .vote-cell.state-o .cell-state { color: #1a6fa8; }
+    .vote-cell.state-d .cell-state { color: #8a7000; }
+    .vote-cell .cell-count {
+      position: absolute;
+      bottom: 1px;
+      right: 2px;
+      font-size: 0.55rem;
+      color: var(--color-accent2);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    /* ══ コメント一覧 ════════════════════════════ */
+    .vote-comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .vote-comment-item {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
+
+    /* ══ ヒートマップ（管理者用） ════════════════ */
+    .heatmap-cell-0 { background: #f0f0f0; }
+    .heatmap-cell-1 { background: #cbe3ff; }
+    .heatmap-cell-2 { background: #7fc1f0; }
+    .heatmap-cell-3 { background: #3a9fd8; color: #fff; }
+    .heatmap-cell-4 { background: #1a7ab8; color: #fff; }
+    .heatmap-cell-5 { background: #0d5a96; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>SkipF グルコン</h1>
+  </div>
+
+  <div class="container">
+
+    <!-- ═══ 日程投票タブ ═══════════════════════ -->
+    <div id="tab-vote" class="tab-pane active">
+
+      <!-- ログインフォーム（未ログイン時） -->
+      <div id="voteMemberLoginArea" class="hidden">
+        <div class="card" style="max-width:360px;margin:0 auto;">
+          <div class="card-title">入室パスワード</div>
+          <p class="text-muted">パスワードを入力してください</p>
+          <div class="login-row">
+            <input type="password" id="voteMemberPasswordInput" placeholder="パスワード"
+              onkeydown="if(event.key==='Enter') voteMemberLogin()">
+            <button onclick="voteMemberLogin()">入室</button>
+          </div>
+          <p class="text-muted mt-8" id="voteMemberLoginError" style="color:#ef4444"></p>
+        </div>
+      </div>
+
+      <!-- 期間外メッセージ（管理者用・今後の拡張用に残す） -->
+      <div id="voteOutOfPeriod" class="out-of-period hidden">
+        <span class="icon">&#x23F0;</span>
+        現在、投票期間外です。<br>
+        投票は毎月5日〜15日のみ入力できます。
+      </div>
+
+      <!-- 参加者向けフォーム -->
+      <div id="voteForm" class="hidden">
+
+        <div class="card">
+          <div class="card-title">&#127358; 翌月グルコン 希望日程を入力</div>
+          <p style="font-size:0.82rem;color:var(--color-accent2);background:var(--color-theme);border-radius:8px;padding:8px 12px;margin-bottom:12px;line-height:1.7">
+            &#128274; 日程投票は匿名投票となるのでご安心ください。<br>
+            報告が必要な方は、ひとことコメント欄にお名前も添えてご入力ください。
+          </p>
+          <p class="text-muted" style="margin-bottom:12px">
+            ○：昼のみ／夜のみ参加可（水色）<br>
+            △：昼も夜も参加可（黄色）<br>
+            ×：NG（グレー・デフォルト）
+          </p>
+
+          <div class="vote-grid-wrapper">
+            <div class="vote-grid" id="voteGrid"><!-- JS で生成 --></div>
+          </div>
+
+          <div class="field" style="margin-top:16px">
+            <label>ひとことコメント（任意）</label>
+            <input type="text" id="voteComment" placeholder="例：よろしくお願いします！SkipFちゃん">
+            <p class="text-muted" style="margin-top:4px">最後にお名前を入れてください（例：SkipFちゃん）</p>
+          </div>
+
+          <div class="field">
+            <label>誕生日パスワード（4桁数字）</label>
+            <input type="text" id="voteBirthdayPw" maxlength="4" placeholder="例：0423"
+              style="width:120px;padding:9px 13px;border:1.5px solid var(--color-border);border-radius:8px;font-family:var(--font-main);font-size:0.95rem;outline:none;">
+            <p class="text-muted" style="margin-top:4px">入力を後から編集するときに使います</p>
+          </div>
+
+          <button class="btn-primary" id="voteSubmitBtn" onclick="submitVote()">送信する</button>
+          <p class="text-muted mt-8" id="voteSubmitMsg"></p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">&#9998; 自分の入力を編集</div>
+          <p class="text-muted">誕生日パスワードを入力して「編集」を押すと、過去の入力を修正できます</p>
+          <div class="login-row" style="margin-top:8px">
+            <input type="text" id="voteEditPw" maxlength="4" placeholder="誕生日4桁"
+              style="width:100px;padding:9px 13px;border:1.5px solid var(--color-border);border-radius:8px;font-family:var(--font-main);font-size:0.95rem;outline:none;">
+            <button onclick="loadMyVote()">編集</button>
+          </div>
+          <p class="text-muted mt-8" id="voteEditMsg"></p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">コメント一覧</div>
+          <div class="vote-comment-list" id="voteCommentList">
+            <p class="text-muted">まだコメントがありません</p>
+          </div>
+        </div>
+
+      </div><!-- /#voteForm -->
+
+      <!-- 管理者用投票パネル -->
+      <div id="voteAdminPanel" class="admin-section hidden">
+        <div class="admin-badge">管理者メニュー（日程投票）</div>
+
+        <!-- 参加者の回答一覧（誰がどのスロットを入れたか・管理者のみ） -->
+        <div id="voteAdminEntryList" style="margin-bottom:16px">
+          <div class="card-title">参加者の回答一覧（運営のみ表示）</div>
+          <div id="voteAdminEntryListContent" class="text-muted">（なし）</div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div class="card-title">
+            投票集計（匿名）
+            <button onclick="setVoteFilter('all')"   id="filterAll"   style="margin-left:8px;padding:2px 10px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-accent2);color:#fff;font-size:0.72rem;cursor:pointer;">全時間帯</button>
+            <button onclick="setVoteFilter('day')"   id="filterDay"   style="padding:2px 10px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-white);font-size:0.72rem;cursor:pointer;">昼帯(9-15)</button>
+            <button onclick="setVoteFilter('night')" id="filterNight" style="padding:2px 10px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-white);font-size:0.72rem;cursor:pointer;">夜帯(20-24)</button>
+          </div>
+          <div class="vote-grid-wrapper" style="margin-top:8px">
+            <div class="vote-grid" id="voteHeatmap"><!-- JS で生成 --></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div class="card-title">オプチャ定型文コピー</div>
+          <button class="btn-secondary" onclick="copyOpchaTemplate()">定型文をコピー</button>
+          <p class="text-muted mt-8" id="opchaMsg"></p>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div class="card-title">日程決定（20日ごろ）</div>
+          <div class="field">
+            <label>グルコン 日程</label>
+            <div class="settings-row">
+              <div class="field"><input type="date" id="decideEveningDate"></div>
+              <div class="field"><input type="text" id="decideEveningTime" placeholder="21:30" style="width:90px;padding:9px;border:1.5px solid var(--color-border);border-radius:8px;font-family:var(--font-main);font-size:0.95rem;outline:none;"></div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="saveVoteResult()">日程を決定・発表</button>
+          <p class="text-muted mt-8" id="voteResultMsg"></p>
+        </div>
+
+        <!-- 月次リセット -->
+        <div style="margin-top:24px;border-top:2px dashed #fca5a5;padding-top:16px">
+          <div class="card-title" style="color:#b91c1c">⚠️ 月次リセット</div>
+          <p class="text-muted" style="margin-bottom:10px">翌月分の投票データ（参加者の回答・日程決定）をすべて削除します。<br>毎月、参加者に入力してもらう前に実行してください。</p>
+          <button class="btn-secondary" style="border-color:#ef4444;color:#b91c1c;" onclick="confirmResetVote()">投票データをリセット</button>
+          <p class="text-muted mt-8" id="voteResetMsg"></p>
+        </div>
+
+        <button class="btn-secondary" style="margin-top:16px" onclick="adminLogout()">ログアウト</button>
+      </div>
+
+    </div><!-- /#tab-vote -->
+
+  </div><!-- /.container -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <script>
+    const ADMIN_CODES = new Set([
+  'naka2026',    // 沙織さん（なかさん）
+  'rie2026',     // リエさん
+  'iwatomo2026', // イワトモさん
+  'kasumi2026'   // かすみん
+]);
+    const MEMBER_CODES = new Set([
+  'skipfnaomi','skipfmaki','skipfsaki','skipfwakana',
+  'skipfumi','skipf1sakki','skipfyumi','skipfyukko','skipfwada',
+  'skipfyuu','skipftaka','skipfmikity','skipfmame','skipfkasumi',
+  'skipfhitomi','skipfnami',
+  'skipfsaaya','skipfmadoka','skipfkayoko','skipfaiya','skipfayaya',
+  'skipfkokko','skipfsanae','skipftomoki','skipfchie','skipfminako',
+  'skipfotsune','skipfnaa','skipfchii','skipf2yoshi',
+  'skipfmika','skipftan','skipfrorupanna','skipfminami','skipfkurumi',
+  'skipferika','skipf3omame','skipfmizuki','skipfshiho','skipfnozomi',
+  'skipfiku','skipfisuzu','skipfnarumi','skipfmayumi','skipf3shio',
+  'skipfren','skipfmikan',
+  'skipfsumi','skipf4yuko','skipfneko','skipfmao','skipfnon','skipfgakki',
+  'skipfmiho','skipfmaa','skipftada','skipfmiyayukkori','skipftoshi',
+  'skipfbou','skipfkukki','skipfmii','skipfasa','skipfriereo',
+  'skipfmitchi','skipfshino','skipfmisaki','skipfhirorin','skipfakki','skipfmai'
+]); // キャンセル・オンライン会員を除く
+
+    // ══════════════════════════════════════════
+    // タブ切り替え
+    // ══════════════════════════════════════════
+    let currentTab = 'vote';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      ['vote', 'morning', 'evening'].forEach(t => {
+        const pane = document.getElementById('tab-' + t);
+        const btn  = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (pane) pane.classList.toggle('active', t === tab);
+        if (btn)  btn.classList.toggle('active', t === tab);
+      });
+      if (tab === 'vote') checkVotePeriod();
+    }
+
+    // ══════════════════════════════════════════
+    // 月次ユーティリティ
+    // ══════════════════════════════════════════
+
+    // 翌月の "YYYY-MM" を返す
+    function getNextMonthKey() {
+      const d = new Date();
+      d.setMonth(d.getMonth() + 1, 1);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    }
+
+    // 翌月の日数を返す
+    function getNextMonthDays() {
+      const d = new Date();
+      d.setMonth(d.getMonth() + 2, 0); // 翌月末日
+      return d.getDate();
+    }
+
+    // "YYYY-MM-DD" → "M/D(曜)" 形式
+    function formatDateShort(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      if (isNaN(d.getTime())) return dateStr;
+      return (d.getMonth()+1) + '/' + d.getDate() + '(' + DOW_JA[d.getDay()] + ')';
+    }
+
+    // ══════════════════════════════════════════
+    // 投票期間制御
+    // ══════════════════════════════════════════
+    function checkVotePeriod() {
+      const voteLoginArea = document.getElementById('voteMemberLoginArea');
+      const voteOut       = document.getElementById('voteOutOfPeriod');
+      const voteForm      = document.getElementById('voteForm');
+      const voteAdm       = document.getElementById('voteAdminPanel');
+
+      const hide = el => { if (el) el.classList.add('hidden'); };
+      const show = el => { if (el) el.classList.remove('hidden'); };
+
+      // 管理者：常に全表示
+      if (isAdminLoggedIn()) {
+        hide(voteLoginArea); hide(voteOut);
+        show(voteForm); show(voteAdm);
+        if (!document.querySelector('#voteGrid .vote-cell')) buildVoteGrid('voteGrid', false);
+        if (!document.querySelector('#voteHeatmap .vote-cell')) buildVoteGrid('voteHeatmap', true);
+        renderVoteAdminEntryList();
+        return;
+      }
+
+      // 未ログイン → ログインフォームをこのタブ内に表示
+      if (!isMemberLoggedIn()) {
+        show(voteLoginArea); hide(voteOut); hide(voteForm); hide(voteAdm);
+        return;
+      }
+
+      // ログイン済みメンバー → 投票フォームを表示
+      hide(voteLoginArea); hide(voteOut); hide(voteAdm);
+      show(voteForm);
+      if (!document.querySelector('#voteGrid .vote-cell')) buildVoteGrid('voteGrid', false);
+    }
+
+    // ══════════════════════════════════════════
+    // 時刻ユーティリティ
+    // ══════════════════════════════════════════
+
+    // "21:00" → 1260, "25:30" → 1530（日本の深夜表記対応）
+    function timeToMin(str) {
+      if (!str || !str.includes(':')) return NaN;
+      const [h, m] = str.trim().split(':').map(Number);
+      if (isNaN(h) || isNaN(m) || h < 0 || m < 0 || m >= 60) return NaN;
+      return h * 60 + m;
+    }
+
+    // 1260 → "21:00", 1530 → "25:30"
+    function minToTime(min) {
+      const h = Math.floor(min / 60);
+      const m = min % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    // XSS 対策
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ══════════════════════════════════════════
+    // EDF スケジュール生成（コアアルゴリズム）
+    // ══════════════════════════════════════════
+    // entries: [{ name, duration, timeStart, timeEnd }, ...]
+    // startTimeStr: "21:00"
+    // 戻り値: [{ index, name, duration, slotStart, slotEnd, deadline, status, overflowMin }, ...]
+    function calcEDF(entries, startTimeStr) {
+      if (!entries || entries.length === 0) return [];
+      const start = timeToMin(startTimeStr || '21:00');
+      if (isNaN(start)) return [];
+
+      // EDF: 希望終了時刻（deadline）が早い順にソート
+      // 同じ deadline の場合は entries の元の順序（提出順）が維持される（安定ソート）
+      const sorted = [...entries].sort((a, b) => {
+        const da = timeToMin(a.timeEnd);
+        const db = timeToMin(b.timeEnd);
+        if (isNaN(da) && isNaN(db)) return 0;
+        if (isNaN(da)) return 1;
+        if (isNaN(db)) return -1;
+        return da - db;
+      });
+
+      let cursor = start;
+      return sorted.map((entry, i) => {
+        const slotStart   = cursor;
+        const slotEnd     = cursor + Number(entry.duration);
+        const deadline    = timeToMin(entry.timeEnd);
+        const overflowMin = isNaN(deadline) ? 0 : Math.max(0, slotEnd - deadline);
+        const status      = overflowMin === 0 ? 'ok' : 'warn';
+        cursor = slotEnd;
+        return { index: i + 1, name: entry.name, duration: Number(entry.duration),
+                 slotStart, slotEnd, deadline, status, overflowMin };
+      });
+    }
+
+    // 丸付き数字（①〜⑳）
+    const CIRCLE_NUMS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩',
+                         '⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+
+    // ══════════════════════════════════════════
+    // Firebase 初期化
+    // ══════════════════════════════════════════
+    const firebaseConfig = {
+      apiKey: "AIzaSyBPbhIwIeAWmmV0NPJ8fmwRHKoUa6oZbzE",
+      authDomain: "skipf-gurucon.firebaseapp.com",
+      databaseURL: "https://skipf-gurucon-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "skipf-gurucon",
+      storageBucket: "skipf-gurucon.firebasestorage.app",
+      messagingSenderId: "285923135157",
+      appId: "1:285923135157:web:de6d42cc9e660eb2e538fc"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ══════════════════════════════════════════
+    // アプリ状態
+    // ══════════════════════════════════════════
+    let currentEvent = null;   // { date, startTime, openDate, deadline }
+    let submissions  = {};     // { [id]: { name, duration, timeStart, timeEnd, submittedAt } }
+
+    // ══════════════════════════════════════════
+    // イベントデータ読み込み・ヘッダー更新
+    // ══════════════════════════════════════════
+    const DOW_JA = ['日','月','火','水','木','金','土'];
+
+    // "2026-05-26" → { month:5, day:26, dow:"火" } または null
+    function parseDateStr(dateStr) {
+      if (!dateStr) return null;
+      const d = new Date(dateStr + 'T00:00:00');
+      if (isNaN(d.getTime())) return null;
+      return { month: d.getMonth() + 1, day: d.getDate(), dow: DOW_JA[d.getDay()] };
+    }
+
+    // "2026-05-26", "21:00" → "5/26(火) 21:00〜"
+    function formatEventTitle(dateStr, startTime) {
+      const p = parseDateStr(dateStr);
+      if (!p) return '—';
+      return `${p.month}/${p.day}(${p.dow}) ${startTime || ''}〜`;
+    }
+
+    // "2026-05-25T23:59" → "5/25(月) 23:59まで"
+    function formatDeadlineBadge(deadlineStr) {
+      if (!deadlineStr) return '受付中';
+      const sep = deadlineStr.includes('T') ? 'T' : ' ';
+      const [datePart, timePart] = deadlineStr.split(sep);
+      const p = parseDateStr(datePart);
+      if (!p) return '受付中';
+      return `${p.month}/${p.day}(${p.dow}) ${timePart}まで`;
+    }
+
+    // Firebase からイベント情報をリアルタイム購読
+    db.ref('/skipf-gurucon/event').on('value', snap => {
+      currentEvent = snap.val() || null;
+      updateHeader();
+      checkAccessPeriod();
+      renderBubbles();
+      if (isAdminLoggedIn()) checkEveningTemplateButton();
+    });
+
+    function updateHeader() {
+      const dateEl  = document.getElementById('eventDateDisplay');
+      const badgeEl = document.getElementById('deadlineBadge');
+      if (currentEvent && currentEvent.date) {
+        dateEl.textContent  = formatEventTitle(currentEvent.date, currentEvent.startTime);
+        badgeEl.textContent = formatDeadlineBadge(currentEvent.deadline);
+        if (isAdminLoggedIn()) {
+          const di = document.getElementById('settingDate');
+          const ti = document.getElementById('settingStartTime');
+          if (di && !di.value) di.value = currentEvent.date || '';
+          if (ti && !ti.value) ti.value = currentEvent.startTime || '';
+        }
+      } else {
+        dateEl.textContent  = '—';
+        badgeEl.textContent = '設定待ち';
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // 参加者認証
+    // ══════════════════════════════════════════
+    function isMemberLoggedIn() {
+      return localStorage.getItem('skipf_member') === 'true';
+    }
+
+    function memberLogin() {
+      const input = document.getElementById('memberPasswordInput').value;
+      const errEl = document.getElementById('memberLoginError');
+      if (MEMBER_CODES.has(input)) {
+        localStorage.setItem('skipf_member', 'true');
+        errEl.textContent = '';
+        checkAccessPeriod();
+      } else {
+        errEl.textContent = 'パスワードが違います';
+      }
+      document.getElementById('memberPasswordInput').value = '';
+    }
+
+    function voteMemberLogin() {
+      const input = document.getElementById('voteMemberPasswordInput').value;
+      const errEl = document.getElementById('voteMemberLoginError');
+      if (MEMBER_CODES.has(input)) {
+        localStorage.setItem('skipf_member', 'true');
+        errEl.textContent = '';
+        checkVotePeriod();        // 投票フォームを表示
+        checkAccessPeriod();      // 夜グルコンタブも同期
+        checkMorningAccessPeriod(); // 昼グルコンタブも同期
+      } else {
+        errEl.textContent = 'パスワードが違います';
+      }
+      document.getElementById('voteMemberPasswordInput').value = '';
+    }
+
+    // ══════════════════════════════════════════
+    // Task 5: 管理者認証
+    // ══════════════════════════════════════════
+    function isAdminLoggedIn() {
+      return localStorage.getItem('skipf_admin') === 'true';
+    }
+
+    function adminLogin() {
+      const input = document.getElementById('adminPasswordInput').value;
+      const errEl = document.getElementById('adminLoginError');
+      if (ADMIN_CODES.has(input)) {
+        localStorage.setItem('skipf_admin', 'true');
+        document.getElementById('adminLoginForm').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        errEl.textContent = '';
+        if (currentEvent) {
+          const di = document.getElementById('settingDate');
+          const ti = document.getElementById('settingStartTime');
+          if (di) di.value = currentEvent.date || '';
+          if (ti) ti.value = currentEvent.startTime || '';
+        }
+        checkAccessPeriod();
+        checkVotePeriod();
+        checkEveningTemplateButton();
+        renderAdminSubmissionList();
+      } else {
+        errEl.textContent = 'パスワードが違います';
+      }
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    function adminLogout() {
+      localStorage.removeItem('skipf_admin');
+      document.getElementById('adminLoginForm').classList.remove('hidden');
+      document.getElementById('adminPanel').classList.add('hidden');
+      checkAccessPeriod();
+    }
+
+    // ══════════════════════════════════════════
+    // Task 6: アクセス期間制御
+    // ══════════════════════════════════════════
+    function checkAccessPeriod() {
+      const participantArea = document.getElementById('participantArea');
+      const outOfPeriodMsg  = document.getElementById('outOfPeriodMsg');
+      const memberLoginArea = document.getElementById('memberLoginArea');
+
+      function showParticipant()  { participantArea.classList.remove('hidden'); outOfPeriodMsg.classList.add('hidden'); memberLoginArea.classList.add('hidden'); }
+      function showOutOfPeriod()  { participantArea.classList.add('hidden'); outOfPeriodMsg.classList.remove('hidden'); memberLoginArea.classList.add('hidden'); }
+      function showMemberLogin()  { participantArea.classList.add('hidden'); outOfPeriodMsg.classList.add('hidden'); memberLoginArea.classList.remove('hidden'); }
+
+      if (isAdminLoggedIn()) { showParticipant(); return; }
+
+      if (!currentEvent || !currentEvent.date) { showOutOfPeriod(); return; }
+
+      const now       = new Date();
+      const eventDate = new Date(currentEvent.date + 'T00:00:00');
+      const openDate  = new Date(eventDate);
+      openDate.setDate(openDate.getDate() - 3);
+      const deadline  = new Date(eventDate);
+      deadline.setDate(deadline.getDate() - 1);
+      deadline.setHours(23, 59, 59, 999);
+      const inPeriod = now >= openDate && now <= deadline;
+
+      if (!inPeriod)          { showOutOfPeriod(); return; }
+      if (isMemberLoggedIn()) { showParticipant(); return; }
+      showMemberLogin();
+    }
+
+    // ══════════════════════════════════════════
+    // Task 7: 参加者吹き出しのリアルタイム表示
+    // ══════════════════════════════════════════
+    const AVATAR_COLORS = [
+      '#3995a3','#5b8dd9','#9b72cf','#d95b8d',
+      '#d9885b','#8dd95b','#5bd9c4','#8589d9'
+    ];
+
+    function getAvatarColor(name) {
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+    }
+
+    db.ref('/skipf-gurucon/submissions').on('value', snap => {
+      submissions = snap.val() || {};
+      renderBubbles();
+      updateForecast();
+      renderAdminSubmissionList();
+    });
+
+    function renderBubbles() {
+      const container = document.getElementById('bubblesContainer');
+      const countEl   = document.getElementById('submissionCount');
+      const entries   = Object.values(submissions)
+        .sort((a, b) => a.submittedAt - b.submittedAt);
+
+      countEl.textContent = entries.length;
+
+      // コンテナをクリア
+      while (container.firstChild) container.removeChild(container.firstChild);
+
+      if (entries.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted';
+        p.textContent = 'まだ入力がありません';
+        container.appendChild(p);
+        return;
+      }
+
+      const startTime    = currentEvent ? (currentEvent.startTime || '21:00') : '21:00';
+      const tempSchedule = calcEDF(entries, startTime);
+
+      entries.forEach(entry => {
+        const row       = tempSchedule.find(r => r.name === entry.name);
+        const indicator = row ? (row.status === 'ok' ? '🟢' : '🔴') : '🟡';
+
+        // .bubble
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'bubble';
+
+        // .bubble-avatar
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'bubble-avatar';
+        avatarDiv.style.background = getAvatarColor(entry.name);
+        avatarDiv.textContent = entry.name.charAt(0);
+
+        // .bubble-body
+        const bodyDiv = document.createElement('div');
+        bodyDiv.className = 'bubble-body';
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'bubble-name';
+        nameDiv.textContent = entry.name;
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'bubble-text';
+        textDiv.textContent = '①' + Number(entry.duration) + '分　②' +
+          entry.timeStart + '〜' + entry.timeEnd + ' ';
+
+        const indSpan = document.createElement('span');
+        indSpan.className = 'bubble-indicator';
+        indSpan.textContent = indicator;
+        textDiv.appendChild(indSpan);
+
+        bodyDiv.appendChild(nameDiv);
+        bodyDiv.appendChild(textDiv);
+        bubbleDiv.appendChild(avatarDiv);
+        bubbleDiv.appendChild(bodyDiv);
+        container.appendChild(bubbleDiv);
+      });
+    }
+
+    // ══════════════════════════════════════════
+    // Task 8: 参加者フォームと 🟢🔴 リアルタイム判定
+    // ══════════════════════════════════════════
+    let selectedDuration = 0;
+
+    function selectDuration(min) {
+      selectedDuration = min;
+      document.getElementById('btn10').classList.toggle('selected', min === 10);
+      document.getElementById('btn20').classList.toggle('selected', min === 20);
+      onFormInput();
+    }
+
+    function validateForm() {
+      const name  = document.getElementById('inputName').value.trim();
+      const start = document.getElementById('inputTimeStart').value.trim();
+      const end   = document.getElementById('inputTimeEnd').value.trim();
+      return name.length > 0
+        && selectedDuration > 0
+        && !isNaN(timeToMin(start))
+        && !isNaN(timeToMin(end))
+        && timeToMin(start) < timeToMin(end);
+    }
+
+    function onFormInput() {
+      document.getElementById('submitBtn').disabled = !validateForm();
+      updateForecast();
+    }
+
+    function updateForecast() {
+      const forecastArea = document.getElementById('forecastArea');
+      const forecastIcon = document.getElementById('forecastIcon');
+      const forecastText = document.getElementById('forecastText');
+
+      const name  = document.getElementById('inputName').value.trim();
+      const start = document.getElementById('inputTimeStart').value.trim();
+      const end   = document.getElementById('inputTimeEnd').value.trim();
+
+      if (!name || selectedDuration === 0 || isNaN(timeToMin(start)) || isNaN(timeToMin(end))) {
+        forecastArea.className = 'forecast hidden';
+        return;
+      }
+
+      const currentEntry = { name, duration: selectedDuration, timeStart: start, timeEnd: end };
+      const allEntries   = [...Object.values(submissions), currentEntry];
+      const eventStart   = currentEvent ? (currentEvent.startTime || '21:00') : '21:00';
+      const schedule     = calcEDF(allEntries, eventStart);
+      // 末尾から探す（同名が既存の場合、入力中の自分は末尾に追加される）
+      const mine         = [...schedule].reverse().find(r => r.name === name);
+
+      if (!mine) { forecastArea.className = 'forecast hidden'; return; }
+
+      // DOM で組み立て（textContent のみ使用）
+      while (forecastText.firstChild) forecastText.removeChild(forecastText.firstChild);
+
+      if (mine.status === 'ok') {
+        forecastArea.className = 'forecast green';
+        forecastIcon.textContent = '🟢';
+        const strong = document.createElement('strong');
+        strong.textContent = '希望通りに入れそうです';
+        const span = document.createElement('span');
+        span.style.color = '#555';
+        span.style.display = 'block';
+        span.textContent = minToTime(mine.slotStart) + '〜' + minToTime(mine.slotEnd) + ' に割り当て予定';
+        forecastText.appendChild(strong);
+        forecastText.appendChild(span);
+      } else {
+        forecastArea.className = 'forecast red';
+        forecastIcon.textContent = '🔴';
+        const strong = document.createElement('strong');
+        strong.textContent = '希望時間を超える可能性があります';
+        const span = document.createElement('span');
+        span.style.color = '#555';
+        span.style.display = 'block';
+        span.textContent = '現時点で ' + mine.overflowMin + '分オーバーの見込み';
+        forecastText.appendChild(strong);
+        forecastText.appendChild(span);
+      }
+    }
+
+    document.getElementById('inputName').addEventListener('input', onFormInput);
+
+    // ══════════════════════════════════════════
+    // Task 9: フォーム送信（Firebase 書き込み）
+    // ══════════════════════════════════════════
+    async function submitEntry() {
+      if (!validateForm()) return;
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled    = true;
+      submitBtn.textContent = '送信中...';
+
+      const entry = {
+        name:        document.getElementById('inputName').value.trim(),
+        duration:    selectedDuration,
+        timeStart:   document.getElementById('inputTimeStart').value.trim(),
+        timeEnd:     document.getElementById('inputTimeEnd').value.trim(),
+        submittedAt: Date.now()
+      };
+
+      try {
+        await db.ref('/skipf-gurucon/submissions').push().set(entry);
+
+        document.getElementById('inputName').value      = '';
+        document.getElementById('inputTimeStart').value = '';
+        document.getElementById('inputTimeEnd').value   = '';
+        selectedDuration = 0;
+        document.getElementById('btn10').classList.remove('selected');
+        document.getElementById('btn20').classList.remove('selected');
+        document.getElementById('forecastArea').className = 'forecast hidden';
+
+        submitBtn.textContent = '送信しました！';
+        setTimeout(() => {
+          submitBtn.textContent = '送信する';
+          submitBtn.disabled    = true;
+        }, 2000);
+
+      } catch (err) {
+        console.error('submitEntry error:', err);
+        alert('送信に失敗しました。もう一度お試しください。');
+        submitBtn.disabled    = false;
+        submitBtn.textContent = '送信する';
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // Task 10: 管理者パネル - グルコン設定・参加者一覧
+    // ══════════════════════════════════════════
+    async function saveEventSettings() {
+      const dateVal = document.getElementById('settingDate').value;
+      const timeVal = document.getElementById('settingStartTime').value.trim();
+      const savedEl = document.getElementById('settingSaved');
+
+      if (!dateVal || !timeVal) {
+        savedEl.textContent = '日付と開始時間を入力してください';
+        savedEl.style.color = '#ef4444';
+        return;
+      }
+
+      const eventDate    = new Date(dateVal + 'T00:00:00');
+      const openDate     = new Date(eventDate);
+      openDate.setDate(openDate.getDate() - 3);
+      const openDateStr  = openDate.toISOString().slice(0, 10);
+      const deadlineDate = new Date(eventDate);
+      deadlineDate.setDate(deadlineDate.getDate() - 1);
+      const deadlineStr  = deadlineDate.toISOString().slice(0, 10) + 'T23:59';
+
+      try {
+        await db.ref('/skipf-gurucon/event').set({
+          date: dateVal, startTime: timeVal,
+          openDate: openDateStr, deadline: deadlineStr
+        });
+        savedEl.textContent =
+          '保存しました（開放：' + openDateStr + '　締切：' + deadlineStr.replace('T', ' ') + '）';
+        savedEl.style.color = '#16a34a';
+      } catch (err) {
+        console.error('saveEventSettings error:', err);
+        savedEl.textContent = '保存に失敗しました';
+        savedEl.style.color = '#ef4444';
+      }
+    }
+
+    function renderAdminSubmissionList() {
+      const listEl  = document.getElementById('adminSubmissionList');
+      const countEl = document.getElementById('adminCount');
+      if (!listEl) return;
+
+      const entries = Object.values(submissions)
+        .sort((a, b) => a.submittedAt - b.submittedAt);
+      countEl.textContent = entries.length;
+
+      // コンテナをクリア
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+
+      if (entries.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted';
+        p.textContent = '（なし）';
+        listEl.appendChild(p);
+        return;
+      }
+
+      const totalMin = entries.reduce((sum, e) => sum + Number(e.duration), 0);
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+
+      // テーブルを DOM で構築（ユーザーデータは textContent で設定）
+      const table = document.createElement('table');
+      table.style.cssText = 'width:100%;border-collapse:collapse;font-size:0.83rem';
+
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      headerRow.style.borderBottom = '2px solid var(--color-border)';
+      ['#', '名前', '時間', '希望帯'].forEach((text, i) => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'text-align:' + (i === 2 ? 'center' : 'left') +
+          ';padding:4px 6px;color:var(--color-muted);font-weight:600';
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      entries.forEach((e, i) => {
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--color-border)';
+
+        const tdNum  = document.createElement('td');
+        tdNum.textContent = i + 1;
+        tdNum.style.cssText = 'padding:4px 6px;color:var(--color-muted)';
+
+        const tdName = document.createElement('td');
+        tdName.textContent = e.name;
+        tdName.style.padding = '4px 6px';
+
+        const tdDur  = document.createElement('td');
+        tdDur.textContent = Number(e.duration) + '分';
+        tdDur.style.cssText = 'padding:4px 6px;text-align:center';
+
+        const tdTime = document.createElement('td');
+        tdTime.textContent = e.timeStart + '〜' + e.timeEnd;
+        tdTime.style.padding = '4px 6px';
+
+        tr.appendChild(tdNum);
+        tr.appendChild(tdName);
+        tr.appendChild(tdDur);
+        tr.appendChild(tdTime);
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      const totalP = document.createElement('p');
+      totalP.className = 'text-muted mt-8';
+      totalP.textContent = '合計 ' + totalMin + '分（' + h + '時間' + m + '分）';
+
+      listEl.appendChild(table);
+      listEl.appendChild(totalP);
+    }
+
+    // ══════════════════════════════════════════
+    // Task 11: スケジュール生成・表示と LINE コピー
+    // ══════════════════════════════════════════
+    function generateSchedule() {
+      const entries    = Object.values(submissions).sort((a, b) => a.submittedAt - b.submittedAt);
+      const eventStart = currentEvent ? (currentEvent.startTime || '21:00') : '21:00';
+      const schedule   = calcEDF(entries, eventStart);
+      const resultEl   = document.getElementById('scheduleResult');
+      const listEl     = document.getElementById('scheduleList');
+
+      // コンテナをクリア
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+
+      if (schedule.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted';
+        p.textContent = '参加者がまだいません';
+        listEl.appendChild(p);
+        resultEl.classList.remove('hidden');
+        return;
+      }
+
+      schedule.forEach((row, i) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'schedule-row';
+
+        const leftSpan = document.createElement('span');
+        leftSpan.textContent = (CIRCLE_NUMS[i] || '(' + (i + 1) + ')') + ' ' +
+          minToTime(row.slotStart) + '〜' + minToTime(row.slotEnd) +
+          '（' + row.duration + '分）' + row.name;
+
+        const statusSpan = document.createElement('span');
+        if (row.status === 'ok') {
+          statusSpan.className = 'status-ok';
+          statusSpan.textContent = '✓';
+        } else {
+          statusSpan.className = 'status-warn';
+          statusSpan.textContent = '⚠ ' + row.overflowMin + '分オーバー';
+        }
+
+        rowDiv.appendChild(leftSpan);
+        rowDiv.appendChild(statusSpan);
+        listEl.appendChild(rowDiv);
+      });
+
+      resultEl.classList.remove('hidden');
+    }
+
+    function copySchedule() {
+      const entries    = Object.values(submissions).sort((a, b) => a.submittedAt - b.submittedAt);
+      const eventStart = currentEvent ? (currentEvent.startTime || '21:00') : '21:00';
+      const schedule   = calcEDF(entries, eventStart);
+
+      if (!currentEvent || !currentEvent.date) {
+        alert('グルコン日程が設定されていません');
+        return;
+      }
+
+      const d      = new Date(currentEvent.date + 'T00:00:00');
+      const wds    = ['日','月','火','水','木','金','土'];
+      const dateStr = (d.getMonth() + 1) + '/' + d.getDate() + '(' + wds[d.getDay()] + ')';
+
+      const lines = [
+        '夜グルコン',
+        dateStr + ' ' + currentEvent.startTime + '〜',
+        '',
+        '【マンスリースケジュール決定のお知らせ】',
+        '',
+        ...schedule.map((row, i) => {
+          const num    = CIRCLE_NUMS[i] || '(' + (i + 1) + ')';
+          const status = row.status === 'ok' ? '✅' : '⚠️ ' + row.overflowMin + '分オーバー';
+          return num + ' ' + minToTime(row.slotStart) + '〜' + minToTime(row.slotEnd) +
+            '（' + row.duration + '分）' + row.name + '　' + status;
+        }),
+        '',
+        '上記のスケジュールがご希望と違っていましたら、',
+        'お気軽にお知らせください😊',
+        'よろしくお願いいたします。'
+      ];
+
+      const text = lines.join('\n');
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => flashCopyBtn());
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity  = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        flashCopyBtn();
+      }
+    }
+
+    function flashCopyBtn() {
+      const btn = document.querySelector('[onclick="copySchedule()"]');
+      if (!btn) return;
+      const orig = btn.textContent;
+      btn.textContent = 'コピーしました！';
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    }
+
+    // ══════════════════════════════════════════
+    // 日程投票：状態変数・Firebase購読
+    // ══════════════════════════════════════════
+    let voteData   = {};      // { [id]: { comment, password, slots, submittedAt } }
+    let mySlots    = {};      // { [dayStr]: { [hourStr]: 'o'|'d' } }
+    let myVoteId   = null;    // 編集中のエントリID
+    let voteFilter = 'all';   // 'all'|'day'|'night'
+
+    const VOTE_HOURS = [9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+
+    // 投票データのリアルタイム購読
+    db.ref('/skipf-gurucon/vote/' + getNextMonthKey() + '/entries').on('value', snap => {
+      voteData = snap.val() || {};
+      renderVoteAggregate();
+      renderVoteComments();
+      renderVoteAdminEntryList(); // 管理者向け：誰がどのスロットを入れたか
+    });
+
+    // 投票結果（日程発表）の購読
+    db.ref('/skipf-gurucon/vote/' + getNextMonthKey() + '/result').on('value', snap => {
+      renderAnnouncementBanner(snap.val());
+    });
+
+    // ══════════════════════════════════════════
+    // タイムライングリッド生成
+    // ══════════════════════════════════════════
+    function buildVoteGrid(containerId, isHeatmap) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const totalDays = getNextMonthDays();
+      const nextMonth = getNextMonthKey();
+      const [ny, nm]  = nextMonth.split('-').map(Number);
+
+      while (container.firstChild) container.removeChild(container.firstChild);
+
+      // ── ヘッダー行（コーナー + 時間ラベル） ──
+      const cornerDiv = document.createElement('div');
+      cornerDiv.className = 'vote-grid-hdr';
+      cornerDiv.textContent = '';
+      container.appendChild(cornerDiv);
+
+      VOTE_HOURS.forEach(h => {
+        const hdrDiv = document.createElement('div');
+        hdrDiv.className = 'vote-grid-hdr';
+        hdrDiv.textContent = h === 24 ? '0' : String(h);
+        container.appendChild(hdrDiv);
+      });
+
+      // ── 各日の行 ──
+      for (let day = 1; day <= totalDays; day++) {
+        const dayStr  = String(day).padStart(2, '0');
+        const dateObj = new Date(ny, nm - 1, day);
+        const dowStr  = DOW_JA[dateObj.getDay()];
+
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'vote-grid-day';
+        if (dateObj.getDay() === 0) dayDiv.style.color = '#ef4444';
+        if (dateObj.getDay() === 6) dayDiv.style.color = '#3b82f6';
+        const dayLine1 = document.createElement('span');
+        dayLine1.textContent = nm + '/' + day;
+        const dayLine2 = document.createElement('span');
+        dayLine2.textContent = dowStr;
+        dayDiv.appendChild(dayLine1);
+        dayDiv.appendChild(dayLine2);
+        container.appendChild(dayDiv);
+
+        VOTE_HOURS.forEach(h => {
+          const hourStr = String(h).padStart(2, '0');
+          const cell    = document.createElement('div');
+          cell.className = 'vote-cell';
+
+          if (isHeatmap) {
+            cell.dataset.day  = dayStr;
+            cell.dataset.hour = hourStr;
+            cell.id = 'hm-' + dayStr + '-' + hourStr;
+            const countSpan = document.createElement('span');
+            countSpan.style.cssText = 'font-size:0.72rem;font-weight:700;';
+            cell.appendChild(countSpan);
+          } else {
+            cell.dataset.day  = dayStr;
+            cell.dataset.hour = hourStr;
+            cell.id = 'vc-' + dayStr + '-' + hourStr;
+            cell.onclick = () => toggleSlot(dayStr, hourStr);
+
+            const stateSpan = document.createElement('span');
+            stateSpan.className = 'cell-state';
+            stateSpan.textContent = '';
+            cell.appendChild(stateSpan);
+
+            const countSpan = document.createElement('span');
+            countSpan.className = 'cell-count';
+            countSpan.textContent = '';
+            cell.appendChild(countSpan);
+
+            const state = (mySlots[dayStr] && mySlots[dayStr][hourStr]) || 'x';
+            applyCellState(cell, state);
+          }
+          container.appendChild(cell);
+        });
+      }
+    }
+
+    function applyCellState(cell, state) {
+      cell.classList.remove('state-o', 'state-d');
+      const stateSpan = cell.querySelector('.cell-state');
+      if (state === 'o' || state === 'd') {
+        cell.classList.add('state-o');
+        if (stateSpan) stateSpan.textContent = '空き';
+      } else {
+        if (stateSpan) stateSpan.textContent = '';
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // スロットトグル（×→空き→×）
+    // ══════════════════════════════════════════
+    function toggleSlot(dayStr, hourStr) {
+      if (!mySlots[dayStr]) mySlots[dayStr] = {};
+      const current = mySlots[dayStr][hourStr] || 'x';
+      const next    = current === 'x' ? 'o' : 'x';
+      if (next === 'x') {
+        delete mySlots[dayStr][hourStr];
+        if (Object.keys(mySlots[dayStr]).length === 0) delete mySlots[dayStr];
+      } else {
+        mySlots[dayStr][hourStr] = next;
+      }
+      const cell = document.getElementById('vc-' + dayStr + '-' + hourStr);
+      if (cell) applyCellState(cell, next);
+    }
+
+    function reflectMySlotsOnGrid() {
+      const totalDays = getNextMonthDays();
+      for (let d = 1; d <= totalDays; d++) {
+        const dayStr = String(d).padStart(2, '0');
+        VOTE_HOURS.forEach(h => {
+          const hourStr = String(h).padStart(2, '0');
+          const state   = (mySlots[dayStr] && mySlots[dayStr][hourStr]) || 'x';
+          const cell    = document.getElementById('vc-' + dayStr + '-' + hourStr);
+          if (cell) applyCellState(cell, state);
+        });
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // 投票送信
+    // ══════════════════════════════════════════
+    async function submitVote() {
+      const comment = document.getElementById('voteComment').value.trim();
+      const pw      = document.getElementById('voteBirthdayPw').value.trim();
+      const msgEl   = document.getElementById('voteSubmitMsg');
+      const btn     = document.getElementById('voteSubmitBtn');
+
+      if (!pw || pw.length !== 4 || !/^\d{4}$/.test(pw)) {
+        msgEl.textContent = '誕生日パスワードは4桁の数字で入力してください';
+        msgEl.style.color = '#ef4444'; return;
+      }
+      if (Object.keys(mySlots).length === 0 && !comment) {
+        msgEl.textContent = '希望スロットかコメントを入力してください';
+        msgEl.style.color = '#ef4444'; return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = '送信中...';
+
+      const monthKey = getNextMonthKey();
+      const entry = {
+        comment:     comment,
+        password:    pw,
+        slots:       mySlots,
+        submittedAt: Date.now()
+      };
+
+      try {
+        if (myVoteId) {
+          await db.ref('/skipf-gurucon/vote/' + monthKey + '/entries/' + myVoteId).set(entry);
+        } else {
+          await db.ref('/skipf-gurucon/vote/' + monthKey + '/entries').push().set(entry);
+        }
+        myVoteId = null;
+        mySlots  = {};
+        reflectMySlotsOnGrid();
+        document.getElementById('voteComment').value    = '';
+        document.getElementById('voteBirthdayPw').value = '';
+        msgEl.textContent = '送信しました！ありがとうございます';
+        msgEl.style.color = '#16a34a';
+        btn.textContent   = '送信しました！';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '送信する'; }, 3000);
+      } catch (err) {
+        console.error('submitVote error:', err);
+        msgEl.textContent = '送信に失敗しました。もう一度お試しください。';
+        msgEl.style.color = '#ef4444';
+        btn.disabled    = false;
+        btn.textContent = '送信する';
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // 投票編集（誕生日PWでロード）
+    // ══════════════════════════════════════════
+    function loadMyVote() {
+      const pw    = document.getElementById('voteEditPw').value.trim();
+      const msgEl = document.getElementById('voteEditMsg');
+
+      if (!pw || pw.length !== 4 || !/^\d{4}$/.test(pw)) {
+        msgEl.textContent = '4桁の数字を入力してください';
+        msgEl.style.color = '#ef4444'; return;
+      }
+
+      const found = Object.entries(voteData).find(([id, e]) => e.password === pw);
+      if (!found) {
+        msgEl.textContent = '該当するデータが見つかりませんでした';
+        msgEl.style.color = '#ef4444'; return;
+      }
+
+      const [id, entry] = found;
+      myVoteId = id;
+      mySlots  = entry.slots ? JSON.parse(JSON.stringify(entry.slots)) : {};
+      document.getElementById('voteComment').value    = entry.comment || '';
+      document.getElementById('voteBirthdayPw').value = entry.password || '';
+      reflectMySlotsOnGrid();
+      msgEl.textContent = '読み込みました。修正後に「送信する」を押してください';
+      msgEl.style.color = '#16a34a';
+      document.getElementById('voteEditPw').value = '';
+    }
+
+    // ══════════════════════════════════════════
+    // 投票集計（匿名・リアルタイム）
+    // ══════════════════════════════════════════
+    function calcAggregateCounts() {
+      const counts = {};
+      Object.values(voteData).forEach(entry => {
+        if (!entry.slots) return;
+        Object.entries(entry.slots).forEach(([day, hours]) => {
+          if (!counts[day]) counts[day] = {};
+          Object.entries(hours).forEach(([hour, state]) => {
+            if (state === 'o' || state === 'd') {
+              counts[day][hour] = (counts[day][hour] || 0) + 1;
+            }
+          });
+        });
+      });
+      return counts;
+    }
+
+    function renderVoteAggregate() {
+      const counts    = calcAggregateCounts();
+      const totalDays = getNextMonthDays();
+
+      // 通常グリッドの集計数バッジ更新
+      for (let d = 1; d <= totalDays; d++) {
+        const dayStr = String(d).padStart(2, '0');
+        VOTE_HOURS.forEach(h => {
+          const hourStr   = String(h).padStart(2, '0');
+          const cell      = document.getElementById('vc-' + dayStr + '-' + hourStr);
+          if (!cell) return;
+          const count     = (counts[dayStr] && counts[dayStr][hourStr]) || 0;
+          const countSpan = cell.querySelector('.cell-count');
+          if (countSpan) countSpan.textContent = count > 0 ? count : '';
+        });
+      }
+
+      renderVoteHeatmap(counts);
+    }
+
+    function renderVoteHeatmap(counts) {
+      const totalDays = getNextMonthDays();
+      const allCounts = Object.values(counts).flatMap(h => Object.values(h));
+      const maxCount  = allCounts.length > 0 ? Math.max(1, ...allCounts) : 1;
+
+      for (let d = 1; d <= totalDays; d++) {
+        const dayStr = String(d).padStart(2, '0');
+        VOTE_HOURS.forEach(h => {
+          const hourStr = String(h).padStart(2, '0');
+          const cell    = document.getElementById('hm-' + dayStr + '-' + hourStr);
+          if (!cell) return;
+
+          // フィルタ適用
+          const skip = (voteFilter === 'day'   && (h < 9  || h > 15))
+                    || (voteFilter === 'night' && (h < 20 || h > 24));
+          if (skip) {
+            cell.className = 'vote-cell heatmap-cell-0';
+            cell.style.opacity = '0.3';
+            const cs = cell.querySelector('span');
+            if (cs) cs.textContent = '';
+            return;
+          }
+          cell.style.opacity = '1';
+
+          const count = (counts[dayStr] && counts[dayStr][hourStr]) || 0;
+          const level = count === 0 ? 0 : Math.min(5, Math.ceil(count / maxCount * 5));
+          cell.className = 'vote-cell heatmap-cell-' + level;
+          const cs = cell.querySelector('span');
+          if (cs) {
+            cs.textContent = count > 0 ? count : '';
+            cs.style.color = level >= 3 ? '#fff' : 'var(--color-accent2)';
+          }
+        });
+      }
+    }
+
+    function setVoteFilter(filter) {
+      voteFilter = filter;
+      ['all', 'day', 'night'].forEach(f => {
+        const btn = document.getElementById('filter' + f.charAt(0).toUpperCase() + f.slice(1));
+        if (!btn) return;
+        btn.style.background = f === filter ? 'var(--color-accent2)' : 'var(--color-white)';
+        btn.style.color      = f === filter ? '#fff' : 'var(--color-text)';
+      });
+      renderVoteHeatmap(calcAggregateCounts());
+    }
+
+    // ══════════════════════════════════════════
+    // コメント一覧
+    // ══════════════════════════════════════════
+    function renderVoteComments() {
+      const listEl = document.getElementById('voteCommentList');
+      if (!listEl) return;
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+
+      const comments = Object.values(voteData)
+        .filter(e => e.comment && e.comment.trim())
+        .sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0));
+
+      if (comments.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted';
+        p.textContent = 'まだコメントがありません';
+        listEl.appendChild(p); return;
+      }
+
+      comments.forEach(entry => {
+        const item = document.createElement('div');
+        item.className = 'vote-comment-item';
+        const span = document.createElement('span');
+        span.textContent = entry.comment;
+        item.appendChild(span);
+        listEl.appendChild(item);
+      });
+    }
+
+    // ══════════════════════════════════════════
+    // オプチャ定型文コピー
+    // ══════════════════════════════════════════
+    function copyOpchaTemplate() {
+      const now       = new Date();
+      const thisMonth = now.getMonth() + 1;
+      const nextMonth = thisMonth === 12 ? 1 : thisMonth + 1;
+      const deadline15 = new Date(now.getFullYear(), now.getMonth(), 15);
+      const dow15      = DOW_JA[deadline15.getDay()];
+      const toolUrl    = 'https://skipf-gurucon-scheduler.netlify.app/';
+
+      const text = `【${nextMonth}月グルコンアンケートのお願い】
+
+🔽下記よりアンケートへのご回答をお願いいたします。
+${toolUrl}
+
+🔔回答期限
+${thisMonth}月15日（${dow15}）まで
+
+入力を間違えた場合は、
+お手数ですが誤った回答を削除のうえ、
+【お一人につき1回答】でお願いいたします。
+
+スムーズなスケジュール調整のため、
+ご協力いただけますと幸いです。よろしくお願いいたします。`;
+
+      const msgEl = document.getElementById('opchaMsg');
+      const copyText = text => {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+        }
+      };
+      copyText(text);
+      if (msgEl) {
+        msgEl.textContent = 'コピーしました！';
+        msgEl.style.color = '#16a34a';
+        setTimeout(() => { msgEl.textContent = ''; }, 3000);
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // 日程決定・保存・発表バナー
+    // ══════════════════════════════════════════
+    async function saveVoteResult() {
+      const eveningDate = document.getElementById('decideEveningDate').value;
+      const eveningTime = document.getElementById('decideEveningTime').value.trim();
+      const msgEl       = document.getElementById('voteResultMsg');
+
+      if (!eveningDate || !eveningTime) {
+        msgEl.textContent = '日付と開始時間を入力してください';
+        msgEl.style.color = '#ef4444'; return;
+      }
+
+      const result = {
+        evening: { date: eveningDate, startTime: eveningTime }
+      };
+
+      try {
+        const monthKey = getNextMonthKey();
+        await db.ref('/skipf-gurucon/vote/' + monthKey + '/result').set(result);
+
+        msgEl.textContent = '日程を決定・発表しました！';
+        msgEl.style.color = '#16a34a';
+      } catch (err) {
+        console.error('saveVoteResult error:', err);
+        msgEl.textContent = '保存に失敗しました';
+        msgEl.style.color = '#ef4444';
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // 月次リセット（管理者専用）
+    // ══════════════════════════════════════════
+    function confirmResetVote() {
+      const monthKey = getNextMonthKey();
+      const [y, m]   = monthKey.split('-');
+      const ok = window.confirm(
+        `【確認】${Number(m)}月分の投票データをすべて削除します。\n` +
+        `・参加者の回答（スロット・コメント）\n` +
+        `・日程決定の発表内容\n\n` +
+        `この操作は取り消せません。よろしいですか？`
+      );
+      if (ok) resetVoteData();
+    }
+
+    async function resetVoteData() {
+      const msgEl    = document.getElementById('voteResetMsg');
+      const monthKey = getNextMonthKey();
+      try {
+        // entries と result を両方削除
+        await db.ref('/skipf-gurucon/vote/' + monthKey).remove();
+        voteData = {};
+        renderVoteAggregate();
+        renderVoteComments();
+        renderVoteAdminEntryList();
+        if (msgEl) {
+          msgEl.textContent = 'リセット完了！参加者に入力してもらえます。';
+          msgEl.style.color = '#16a34a';
+          setTimeout(() => { msgEl.textContent = ''; }, 4000);
+        }
+      } catch (err) {
+        console.error('resetVoteData error:', err);
+        if (msgEl) {
+          msgEl.textContent = '削除に失敗しました。もう一度お試しください。';
+          msgEl.style.color = '#ef4444';
+        }
+      }
+    }
+
+    function renderAnnouncementBanner(result) {
+      const banner = document.getElementById('announcementBanner');
+      if (!banner) return;
+
+      // タブボタンの日時ラベルを更新
+      const tabDateMorning = document.getElementById('tabDateMorning');
+      const tabDateEvening = document.getElementById('tabDateEvening');
+
+      if (!result || (!result.morning && !result.evening)) {
+        banner.classList.add('hidden');
+        if (tabDateMorning) tabDateMorning.textContent = '';
+        if (tabDateEvening) tabDateEvening.textContent = '';
+        return;
+      }
+
+      let lines = ['&#127882; 今月のグルコン日程'];
+      if (result.morning && result.morning.date) {
+        const label = formatDateShort(result.morning.date) + ' ' + result.morning.startTime + '〜';
+        lines.push('昼グルコン：' + label);
+        if (tabDateMorning) tabDateMorning.textContent = formatDateShort(result.morning.date);
+      }
+      if (result.evening && result.evening.date) {
+        const label = formatDateShort(result.evening.date) + ' ' + result.evening.startTime + '〜';
+        lines.push('夜グルコン：' + label);
+        if (tabDateEvening) tabDateEvening.textContent = formatDateShort(result.evening.date);
+      }
+      banner.innerHTML = lines.join('<br>');
+      banner.classList.remove('hidden');
+    }
+
+    // ══════════════════════════════════════════
+    // 3日前定型文ボタン
+    // ══════════════════════════════════════════
+    function isThreeDaysBefore(eventData) {
+      if (!eventData || !eventData.date) return false;
+      const now         = new Date();
+      const eventDate   = new Date(eventData.date + 'T00:00:00');
+      const threeBefore = new Date(eventDate); threeBefore.setDate(threeBefore.getDate() - 3); threeBefore.setHours(0,0,0,0);
+      const twoBefore   = new Date(eventDate); twoBefore.setDate(twoBefore.getDate() - 2);   twoBefore.setHours(0,0,0,0);
+      return now >= threeBefore && now < twoBefore;
+    }
+
+    function checkEveningTemplateButton() {
+      const section = document.getElementById('eveningTemplateSection');
+      if (!section) return;
+      section.classList.toggle('hidden', !(isAdminLoggedIn() && isThreeDaysBefore(currentEvent)));
+    }
+
+    function checkMorningTemplateButton() {
+      const section = document.getElementById('morningTemplateSection');
+      if (!section) return;
+      section.classList.toggle('hidden', !(isAdminLoggedIn() && isThreeDaysBefore(morningEvent)));
+    }
+
+    // 共通：定型文生成＆コピー
+    function copyGuruconTemplate(eventData, type, deadlineTime) {
+      if (!eventData || !eventData.date) { alert('グルコン日程が設定されていません'); return; }
+      const eventDate = new Date(eventData.date + 'T00:00:00');
+      const prevDate  = new Date(eventDate); prevDate.setDate(prevDate.getDate() - 1);
+      const eventStr  = (eventDate.getMonth()+1) + '/' + eventDate.getDate() + '(' + DOW_JA[eventDate.getDay()] + ')';
+      const prevStr   = (prevDate.getMonth()+1)  + '/' + prevDate.getDate()  + '(' + DOW_JA[prevDate.getDay()]  + ')';
+
+      const text = `＼${eventStr} ${eventData.startTime}〜 ${type}グルコン／
+参加される方は、
+
+①10分 or 20分
+②参加希望の時間帯
+終了希望時間がある方はあわせてご記載ください。
+（とくにない方は未記入でいただけると助かります🙇‍♀️）
+
+以下のスレッドにて教えてください。
+よろしくお願い申し上げます。
+
+🔔${prevStr}${deadlineTime}まで
+＿＿＿
+
+✅事前質問締切
+昼グルコン：前日12:00まで
+夜グルコン：前日23:59まで`;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea'); ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+    }
+
+    function copyEveningTemplate() {
+      copyGuruconTemplate(currentEvent, '夜', '23:59');
+      const msgEl = document.getElementById('eveningTemplateMsg');
+      if (msgEl) { msgEl.textContent = 'コピーしました！'; msgEl.style.color = '#16a34a';
+        setTimeout(() => { msgEl.textContent = ''; }, 3000); }
+    }
+
+    function copyMorningTemplate() {
+      copyGuruconTemplate(morningEvent, '昼', '12:00');
+      const msgEl = document.getElementById('morningTemplateMsg');
+      if (msgEl) { msgEl.textContent = 'コピーしました！'; msgEl.style.color = '#16a34a';
+        setTimeout(() => { msgEl.textContent = ''; }, 3000); }
+    }
+
+    // ══════════════════════════════════════════
+    // 昼グルコン：状態変数・Firebase購読
+    // ══════════════════════════════════════════
+    let morningEvent              = null;
+    let morningSubmissions        = {};
+    let morningSelectedDuration   = 0;
+
+    db.ref('/skipf-gurucon/event-morning').on('value', snap => {
+      morningEvent = snap.val() || null;
+      updateMorningHeader();
+      checkMorningAccessPeriod();
+      renderMorningBubbles();
+      if (isAdminLoggedIn()) checkMorningTemplateButton();
+    });
+
+    db.ref('/skipf-gurucon/submissions-morning').on('value', snap => {
+      morningSubmissions = snap.val() || {};
+      renderMorningBubbles();
+      updateMorningForecast();
+      renderMorningAdminSubmissionList();
+    });
+
+    function updateMorningHeader() {
+      const dateEl  = document.getElementById('morningEventDateDisplay');
+      const badgeEl = document.getElementById('morningDeadlineBadge');
+      if (!dateEl) return;
+      if (morningEvent && morningEvent.date) {
+        dateEl.textContent  = formatEventTitle(morningEvent.date, morningEvent.startTime);
+        badgeEl.textContent = formatDeadlineBadge(morningEvent.deadline);
+        if (isAdminLoggedIn()) {
+          const di = document.getElementById('morningSettingDate');
+          const ti = document.getElementById('morningSettingStartTime');
+          if (di && !di.value) di.value = morningEvent.date || '';
+          if (ti && !ti.value) ti.value = morningEvent.startTime || '';
+        }
+      } else {
+        dateEl.textContent  = '—';
+        badgeEl.textContent = '設定待ち';
+      }
+    }
+
+    function checkMorningAccessPeriod() {
+      const participantArea = document.getElementById('morningParticipantArea');
+      const outOfPeriodMsg  = document.getElementById('morningOutOfPeriod');
+      const memberLoginArea = document.getElementById('morningMemberLoginArea');
+      if (!participantArea) return;
+
+      const show = el => el.classList.remove('hidden');
+      const hide = el => el.classList.add('hidden');
+
+      if (isAdminLoggedIn()) {
+        show(participantArea); hide(outOfPeriodMsg); hide(memberLoginArea); return;
+      }
+      if (!morningEvent || !morningEvent.date) {
+        hide(participantArea); show(outOfPeriodMsg); hide(memberLoginArea); return;
+      }
+      const now      = new Date();
+      const openDate = new Date(morningEvent.openDate + 'T00:00:00');
+      const deadline = new Date(morningEvent.deadline);
+      const inPeriod = now >= openDate && now <= deadline;
+
+      if (!inPeriod)          { hide(participantArea); show(outOfPeriodMsg);  hide(memberLoginArea); return; }
+      if (isMemberLoggedIn()) { show(participantArea); hide(outOfPeriodMsg);  hide(memberLoginArea); return; }
+      hide(participantArea); hide(outOfPeriodMsg); show(memberLoginArea);
+    }
+
+    function morningMemberLogin() {
+      const input = document.getElementById('morningMemberPasswordInput').value;
+      const errEl = document.getElementById('morningMemberLoginError');
+      if (MEMBER_CODES.has(input)) {
+        localStorage.setItem('skipf_member', 'true');
+        errEl.textContent = '';
+        checkMorningAccessPeriod();
+      } else {
+        errEl.textContent = 'パスワードが違います';
+      }
+      document.getElementById('morningMemberPasswordInput').value = '';
+    }
+
+    function morningAdminLogin() {
+      const input = document.getElementById('morningAdminPasswordInput').value;
+      const errEl = document.getElementById('morningAdminLoginError');
+      if (ADMIN_CODES.has(input)) {
+        localStorage.setItem('skipf_admin', 'true');
+        document.getElementById('morningAdminLoginForm').classList.add('hidden');
+        document.getElementById('morningAdminPanel').classList.remove('hidden');
+        if (morningEvent) {
+          const di = document.getElementById('morningSettingDate');
+          const ti = document.getElementById('morningSettingStartTime');
+          if (di) di.value = morningEvent.date || '';
+          if (ti) ti.value = morningEvent.startTime || '';
+        }
+        checkMorningAccessPeriod();
+        renderMorningAdminSubmissionList();
+        checkMorningTemplateButton();
+        // 夜グルコンと投票タブの管理者パネルも同期
+        document.getElementById('adminLoginForm').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        checkVotePeriod();
+      } else {
+        errEl.textContent = 'パスワードが違います';
+      }
+      document.getElementById('morningAdminPasswordInput').value = '';
+    }
+
+    function morningAdminLogout() {
+      localStorage.removeItem('skipf_admin');
+      document.getElementById('morningAdminLoginForm').classList.remove('hidden');
+      document.getElementById('morningAdminPanel').classList.add('hidden');
+      checkMorningAccessPeriod();
+    }
+
+    function selectMorningDuration(min) {
+      morningSelectedDuration = min;
+      document.getElementById('morningBtn10').classList.toggle('selected', min === 10);
+      document.getElementById('morningBtn20').classList.toggle('selected', min === 20);
+      onMorningFormInput();
+    }
+
+    function validateMorningForm() {
+      const name  = document.getElementById('morningInputName').value.trim();
+      const start = document.getElementById('morningInputTimeStart').value.trim();
+      const end   = document.getElementById('morningInputTimeEnd').value.trim();
+      return name.length > 0 && morningSelectedDuration > 0
+        && !isNaN(timeToMin(start)) && !isNaN(timeToMin(end))
+        && timeToMin(start) < timeToMin(end);
+    }
+
+    function onMorningFormInput() {
+      document.getElementById('morningSubmitBtn').disabled = !validateMorningForm();
+      updateMorningForecast();
+    }
+
+    function updateMorningForecast() {
+      const forecastArea = document.getElementById('morningForecastArea');
+      const forecastIcon = document.getElementById('morningForecastIcon');
+      const forecastText = document.getElementById('morningForecastText');
+      if (!forecastArea) return;
+
+      const name  = document.getElementById('morningInputName') ? document.getElementById('morningInputName').value.trim() : '';
+      const start = document.getElementById('morningInputTimeStart') ? document.getElementById('morningInputTimeStart').value.trim() : '';
+      const end   = document.getElementById('morningInputTimeEnd') ? document.getElementById('morningInputTimeEnd').value.trim() : '';
+
+      if (!name || morningSelectedDuration === 0 || isNaN(timeToMin(start)) || isNaN(timeToMin(end))) {
+        forecastArea.className = 'forecast hidden'; return;
+      }
+      const allEntries = [...Object.values(morningSubmissions),
+        { name, duration: morningSelectedDuration, timeStart: start, timeEnd: end }];
+      const eventStart = morningEvent ? (morningEvent.startTime || '10:00') : '10:00';
+      const schedule   = calcEDF(allEntries, eventStart);
+      const mine       = [...schedule].reverse().find(r => r.name === name);
+      if (!mine) { forecastArea.className = 'forecast hidden'; return; }
+
+      while (forecastText.firstChild) forecastText.removeChild(forecastText.firstChild);
+      if (mine.status === 'ok') {
+        forecastArea.className = 'forecast green';
+        forecastIcon.textContent = '🟢';
+        const s = document.createElement('strong'); s.textContent = '希望通りに入れそうです';
+        const sp = document.createElement('span'); sp.style.cssText = 'color:#555;display:block';
+        sp.textContent = minToTime(mine.slotStart) + '〜' + minToTime(mine.slotEnd) + ' に割り当て予定';
+        forecastText.appendChild(s); forecastText.appendChild(sp);
+      } else {
+        forecastArea.className = 'forecast red';
+        forecastIcon.textContent = '🔴';
+        const s = document.createElement('strong'); s.textContent = '希望時間を超える可能性があります';
+        const sp = document.createElement('span'); sp.style.cssText = 'color:#555;display:block';
+        sp.textContent = '現時点で ' + mine.overflowMin + '分オーバーの見込み';
+        forecastText.appendChild(s); forecastText.appendChild(sp);
+      }
+    }
+
+    document.getElementById('morningInputName').addEventListener('input', onMorningFormInput);
+
+    function renderMorningBubbles() {
+      const container = document.getElementById('morningBubblesContainer');
+      const countEl   = document.getElementById('morningSubmissionCount');
+      if (!container) return;
+      const entries = Object.values(morningSubmissions).sort((a, b) => a.submittedAt - b.submittedAt);
+      countEl.textContent = entries.length;
+      while (container.firstChild) container.removeChild(container.firstChild);
+      if (entries.length === 0) {
+        const p = document.createElement('p'); p.className = 'text-muted';
+        p.textContent = 'まだ入力がありません'; container.appendChild(p); return;
+      }
+      const startTime    = morningEvent ? (morningEvent.startTime || '10:00') : '10:00';
+      const tempSchedule = calcEDF(entries, startTime);
+      entries.forEach(entry => {
+        const row       = tempSchedule.find(r => r.name === entry.name);
+        const indicator = row ? (row.status === 'ok' ? '🟢' : '🔴') : '🟡';
+        const bubbleDiv = document.createElement('div'); bubbleDiv.className = 'bubble';
+        const avatarDiv = document.createElement('div'); avatarDiv.className = 'bubble-avatar';
+        avatarDiv.style.background = getAvatarColor(entry.name);
+        avatarDiv.textContent = entry.name.charAt(0);
+        const bodyDiv = document.createElement('div'); bodyDiv.className = 'bubble-body';
+        const nameDiv = document.createElement('div'); nameDiv.className = 'bubble-name';
+        nameDiv.textContent = entry.name;
+        const textDiv = document.createElement('div'); textDiv.className = 'bubble-text';
+        textDiv.textContent = '①' + Number(entry.duration) + '分　②' + entry.timeStart + '〜' + entry.timeEnd + ' ';
+        const indSpan = document.createElement('span'); indSpan.className = 'bubble-indicator';
+        indSpan.textContent = indicator; textDiv.appendChild(indSpan);
+        bodyDiv.appendChild(nameDiv); bodyDiv.appendChild(textDiv);
+        bubbleDiv.appendChild(avatarDiv); bubbleDiv.appendChild(bodyDiv);
+        container.appendChild(bubbleDiv);
+      });
+    }
+
+    async function submitMorningEntry() {
+      if (!validateMorningForm()) return;
+      const btn = document.getElementById('morningSubmitBtn');
+      btn.disabled = true; btn.textContent = '送信中...';
+      const entry = {
+        name:        document.getElementById('morningInputName').value.trim(),
+        duration:    morningSelectedDuration,
+        timeStart:   document.getElementById('morningInputTimeStart').value.trim(),
+        timeEnd:     document.getElementById('morningInputTimeEnd').value.trim(),
+        submittedAt: Date.now()
+      };
+      try {
+        await db.ref('/skipf-gurucon/submissions-morning').push().set(entry);
+        document.getElementById('morningInputName').value      = '';
+        document.getElementById('morningInputTimeStart').value = '';
+        document.getElementById('morningInputTimeEnd').value   = '';
+        morningSelectedDuration = 0;
+        document.getElementById('morningBtn10').classList.remove('selected');
+        document.getElementById('morningBtn20').classList.remove('selected');
+        document.getElementById('morningForecastArea').className = 'forecast hidden';
+        btn.textContent = '送信しました！';
+        setTimeout(() => { btn.textContent = '送信する'; btn.disabled = true; }, 2000);
+      } catch (err) {
+        console.error('submitMorningEntry error:', err);
+        alert('送信に失敗しました。もう一度お試しください。');
+        btn.disabled = false; btn.textContent = '送信する';
+      }
+    }
+
+    async function saveMorningEventSettings() {
+      const dateVal = document.getElementById('morningSettingDate').value;
+      const timeVal = document.getElementById('morningSettingStartTime').value.trim();
+      const savedEl = document.getElementById('morningSettingSaved');
+      if (!dateVal || !timeVal) {
+        savedEl.textContent = '日付と開始時間を入力してください';
+        savedEl.style.color = '#ef4444'; return;
+      }
+      const eventDate = new Date(dateVal + 'T00:00:00');
+      const openDate  = new Date(eventDate); openDate.setDate(openDate.getDate() - 3);
+      const dlDate    = new Date(eventDate); dlDate.setDate(dlDate.getDate() - 1);
+      // 昼グルコンの締切は前日12:00
+      const deadlineStr = dlDate.toISOString().slice(0, 10) + 'T12:00';
+      try {
+        await db.ref('/skipf-gurucon/event-morning').set({
+          date: dateVal, startTime: timeVal,
+          openDate: openDate.toISOString().slice(0, 10),
+          deadline: deadlineStr
+        });
+        savedEl.textContent = '保存しました（締切：前日 12:00）';
+        savedEl.style.color = '#16a34a';
+      } catch (err) {
+        savedEl.textContent = '保存に失敗しました'; savedEl.style.color = '#ef4444';
+      }
+    }
+
+    function renderMorningAdminSubmissionList() {
+      const listEl  = document.getElementById('morningAdminSubmissionList');
+      const countEl = document.getElementById('morningAdminCount');
+      if (!listEl) return;
+      const entries = Object.values(morningSubmissions).sort((a, b) => a.submittedAt - b.submittedAt);
+      countEl.textContent = entries.length;
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+      if (entries.length === 0) {
+        const p = document.createElement('p'); p.className = 'text-muted';
+        p.textContent = '（なし）'; listEl.appendChild(p); return;
+      }
+      const totalMin = entries.reduce((sum, e) => sum + Number(e.duration), 0);
+      const h = Math.floor(totalMin / 60); const m = totalMin % 60;
+      const table = document.createElement('table');
+      table.style.cssText = 'width:100%;border-collapse:collapse;font-size:0.83rem';
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      headerRow.style.borderBottom = '2px solid var(--color-border)';
+      ['#', '名前', '時間', '希望帯'].forEach((text, i) => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.style.cssText = 'text-align:' + (i === 2 ? 'center' : 'left') + ';padding:4px 6px;color:var(--color-muted);font-weight:600';
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow); table.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      entries.forEach((e, i) => {
+        const tr = document.createElement('tr'); tr.style.borderBottom = '1px solid var(--color-border)';
+        [i+1, e.name, Number(e.duration)+'分', e.timeStart+'〜'+e.timeEnd].forEach((val, ci) => {
+          const td = document.createElement('td'); td.textContent = val;
+          td.style.cssText = 'padding:4px 6px' + (ci === 2 ? ';text-align:center' : '');
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      const totalP = document.createElement('p'); totalP.className = 'text-muted mt-8';
+      totalP.textContent = '合計 ' + totalMin + '分（' + h + '時間' + m + '分）';
+      listEl.appendChild(table); listEl.appendChild(totalP);
+    }
+
+    function generateMorningSchedule() {
+      const entries    = Object.values(morningSubmissions).sort((a, b) => a.submittedAt - b.submittedAt);
+      const eventStart = morningEvent ? (morningEvent.startTime || '10:00') : '10:00';
+      const schedule   = calcEDF(entries, eventStart);
+      const resultEl   = document.getElementById('morningScheduleResult');
+      const listEl     = document.getElementById('morningScheduleList');
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+      if (schedule.length === 0) {
+        const p = document.createElement('p'); p.className = 'text-muted';
+        p.textContent = '参加者がまだいません'; listEl.appendChild(p);
+        resultEl.classList.remove('hidden'); return;
+      }
+      schedule.forEach((row, i) => {
+        const rowDiv = document.createElement('div'); rowDiv.className = 'schedule-row';
+        const leftSpan = document.createElement('span');
+        leftSpan.textContent = (CIRCLE_NUMS[i] || '('+(i+1)+')') + ' ' +
+          minToTime(row.slotStart) + '〜' + minToTime(row.slotEnd) + '（' + row.duration + '分）' + row.name;
+        const statusSpan = document.createElement('span');
+        statusSpan.className = row.status === 'ok' ? 'status-ok' : 'status-warn';
+        statusSpan.textContent = row.status === 'ok' ? '✓' : '⚠ ' + row.overflowMin + '分オーバー';
+        rowDiv.appendChild(leftSpan); rowDiv.appendChild(statusSpan); listEl.appendChild(rowDiv);
+      });
+      resultEl.classList.remove('hidden');
+    }
+
+    function copyMorningSchedule() {
+      const entries    = Object.values(morningSubmissions).sort((a, b) => a.submittedAt - b.submittedAt);
+      const eventStart = morningEvent ? (morningEvent.startTime || '10:00') : '10:00';
+      const schedule   = calcEDF(entries, eventStart);
+      if (!morningEvent || !morningEvent.date) { alert('グルコン日程が設定されていません'); return; }
+      const d = new Date(morningEvent.date + 'T00:00:00');
+      const dateStr = (d.getMonth()+1) + '/' + d.getDate() + '(' + DOW_JA[d.getDay()] + ')';
+      const lines = [
+        '昼グルコン', dateStr + ' ' + morningEvent.startTime + '〜', '',
+        '【マンスリースケジュール決定のお知らせ】', '',
+        ...schedule.map((row, i) => {
+          const num    = CIRCLE_NUMS[i] || '('+(i+1)+')';
+          const status = row.status === 'ok' ? '✅' : '⚠️ ' + row.overflowMin + '分オーバー';
+          return num + ' ' + minToTime(row.slotStart) + '〜' + minToTime(row.slotEnd) +
+            '（' + row.duration + '分）' + row.name + '　' + status;
+        }),
+        '', '上記のスケジュールがご希望と違っていましたら、',
+        'お気軽にお知らせください😊', 'よろしくお願いいたします。'
+      ];
+      const text = lines.join('\n');
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.querySelector('[onclick="copyMorningSchedule()"]');
+          if (btn) { const orig = btn.textContent; btn.textContent = 'コピーしました！';
+            setTimeout(() => { btn.textContent = orig; }, 2000); }
+        });
+      } else {
+        const ta = document.createElement('textarea'); ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // タブナビ表示（ログイン後に呼ぶ）
+    // ══════════════════════════════════════════
+    function showTabNav() {
+      const nav = document.getElementById('tabNav');
+      if (nav) nav.classList.remove('hidden');
+    }
+
+    // ══════════════════════════════════════════
+    // 参加者の回答一覧（管理者用・誰がどのスロットか）
+    // ══════════════════════════════════════════
+    function renderVoteAdminEntryList() {
+      const listEl = document.getElementById('voteAdminEntryListContent');
+      if (!listEl) return;
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+
+      const entries = Object.entries(voteData)
+        .sort(([, a], [, b]) => (a.submittedAt || 0) - (b.submittedAt || 0));
+
+      if (entries.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted';
+        p.textContent = 'まだ回答がありません';
+        listEl.appendChild(p);
+        return;
+      }
+
+      const nextMonth = getNextMonthKey();
+      const [ny, nm]  = nextMonth.split('-').map(Number);
+
+      entries.forEach(([id, entry], idx) => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:8px 0;border-bottom:1px solid var(--color-border)';
+
+        // ── 名前（コメント） ──
+        const header = document.createElement('div');
+        header.style.cssText = 'font-size:0.85rem;font-weight:600;margin-bottom:4px;color:var(--color-text)';
+        header.textContent = (idx + 1) + '. ' + (entry.comment || '（コメントなし）');
+        item.appendChild(header);
+
+        // ── スロット集約 ──
+        if (entry.slots) {
+          const oSlots = [];
+          const dSlots = [];
+
+          // 日付順にソートして出力
+          const sortedDays = Object.keys(entry.slots).sort();
+          sortedDays.forEach(day => {
+            const dayNum  = parseInt(day, 10);
+            const dateObj = new Date(ny, nm - 1, dayNum);
+            const dayLabel = nm + '/' + dayNum + '(' + DOW_JA[dateObj.getDay()] + ')';
+            const hours = entry.slots[day];
+            const sortedHours = Object.keys(hours).sort((a, b) => parseInt(a) - parseInt(b));
+            sortedHours.forEach(hour => {
+              const state = hours[hour];
+              const label = dayLabel + ' ' + parseInt(hour, 10) + '時';
+              if (state === 'o') oSlots.push(label);
+              else if (state === 'd') dSlots.push(label);
+            });
+          });
+
+          if (oSlots.length > 0) {
+            const p = document.createElement('p');
+            p.style.cssText = 'font-size:0.78rem;color:#1a6fa8;margin:2px 0;line-height:1.6';
+            p.textContent = '○ ' + oSlots.join('　');
+            item.appendChild(p);
+          }
+          if (dSlots.length > 0) {
+            const p = document.createElement('p');
+            p.style.cssText = 'font-size:0.78rem;color:#8a7000;margin:2px 0;line-height:1.6';
+            p.textContent = '△ ' + dSlots.join('　');
+            item.appendChild(p);
+          }
+          if (oSlots.length === 0 && dSlots.length === 0) {
+            const p = document.createElement('p');
+            p.style.cssText = 'font-size:0.78rem;color:var(--color-muted);margin:2px 0';
+            p.textContent = 'スロット未入力';
+            item.appendChild(p);
+          }
+        }
+
+        listEl.appendChild(item);
+      });
+    }
+
+    // ══════════════════════════════════════════
+    // ページ読み込み時のセッション復元
+    // ══════════════════════════════════════════
+    (function initSession() {
+      // ログイン済みならタブナビを表示
+      if (isAdminLoggedIn() || isMemberLoggedIn()) {
+        showTabNav();
+      }
+      if (isAdminLoggedIn()) {
+        document.getElementById('adminLoginForm').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        // 昼グルコン管理者パネルも復元
+        const mlf = document.getElementById('morningAdminLoginForm');
+        const mlp = document.getElementById('morningAdminPanel');
+        if (mlf) mlf.classList.add('hidden');
+        if (mlp) mlp.classList.remove('hidden');
+      }
+      // 投票タブの表示状態を初期化（tab-vote はページ読み込み時からアクティブなので手動で呼ぶ）
+      checkVotePeriod();
+      // checkAccessPeriod は Firebase イベントデータ取得後に呼ばれる
+    })();
+  </script>
+</body>
+</html>
+
+
+
+
