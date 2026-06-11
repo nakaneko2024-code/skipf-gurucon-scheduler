@@ -1522,9 +1522,12 @@
     function applyCellState(cell, state) {
       cell.classList.remove('state-o', 'state-d');
       const stateSpan = cell.querySelector('.cell-state');
-      if (state === 'o' || state === 'd') {
+      if (state === 'o') {
         cell.classList.add('state-o');
-        if (stateSpan) stateSpan.textContent = '空き';
+        if (stateSpan) stateSpan.textContent = '○';
+      } else if (state === 'd') {
+        cell.classList.add('state-d');
+        if (stateSpan) stateSpan.textContent = '△';
       } else {
         if (stateSpan) stateSpan.textContent = '';
       }
