@@ -6,7 +6,7 @@
   <title>SkipF グルコン スケジュール入力</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --color-theme:   #cbe3ff;
@@ -20,7 +20,7 @@
       --radius-card:   16px;
       --radius-btn:    10px;
       --radius-bubble: 0 14px 14px 14px;
-      --font-main: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+      --font-main: 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', sans-serif;
       --shadow-card: 0 2px 10px rgba(57, 149, 163, 0.10);
     }
 
@@ -1536,7 +1536,7 @@
     function toggleSlot(dayStr, hourStr) {
       if (!mySlots[dayStr]) mySlots[dayStr] = {};
       const current = mySlots[dayStr][hourStr] || 'x';
-      const next    = current === 'x' ? 'o' : 'x';
+      const next    = current === 'x' ? 'o' : current === 'o' ? 'd' : 'x';
       if (next === 'x') {
         delete mySlots[dayStr][hourStr];
         if (Object.keys(mySlots[dayStr]).length === 0) delete mySlots[dayStr];
