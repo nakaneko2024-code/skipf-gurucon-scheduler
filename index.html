@@ -462,6 +462,8 @@
 
   <div class="page-header">
     <h1>SkipF グルコン</h1>
+    <div class="event-date" id="eventDateDisplay" style="font-size:1.1rem;font-weight:700;margin-top:4px">—</div>
+    <div class="deadline-badge" id="deadlineBadge" style="font-size:0.82rem;margin-top:4px">設定待ち</div>
   </div>
 
   <div class="container">
@@ -500,8 +502,8 @@
             報告が必要な方は、ひとことコメント欄にお名前も添えてご入力ください。
           </p>
           <p class="text-muted" style="margin-bottom:12px">
-            ○：昼のみ／夜のみ参加可（水色）<br>
-            △：昼も夜も参加可（黄色）<br>
+            ○：参加できる（水色）<br>
+            △：たぶん参加できる（黄色）<br>
             ×：NG（グレー・デフォルト）
           </p>
 
@@ -981,6 +983,7 @@
     function renderBubbles() {
       const container = document.getElementById('bubblesContainer');
       const countEl   = document.getElementById('submissionCount');
+      if (!container || !countEl) return;
       const entries   = Object.values(submissions)
         .sort((a, b) => a.submittedAt - b.submittedAt);
 
@@ -2399,13 +2402,10 @@ ${thisMonth}月15日（${dow15}）まで
         showTabNav();
       }
       if (isAdminLoggedIn()) {
-        document.getElementById('adminLoginForm').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
-        // 昼グルコン管理者パネルも復元
-        const mlf = document.getElementById('morningAdminLoginForm');
-        const mlp = document.getElementById('morningAdminPanel');
-        if (mlf) mlf.classList.add('hidden');
-        if (mlp) mlp.classList.remove('hidden');
+        const alf = document.getElementById('adminLoginForm');
+        const alp = document.getElementById('adminPanel');
+        if (alf) alf.classList.add('hidden');
+        if (alp) alp.classList.remove('hidden');
       }
       // 投票タブの表示状態を初期化（tab-vote はページ読み込み時からアクティブなので手動で呼ぶ）
       checkVotePeriod();
