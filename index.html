@@ -548,7 +548,21 @@
 
       </div><!-- /#voteForm -->
 
+      <!-- 管理者ログインフォーム -->
+      <div id="adminLoginForm" class="hidden">
+        <div class="card" style="max-width:360px;margin:0 auto;">
+          <div class="card-title">管理者ログイン</div>
+          <div class="login-row">
+            <input type="password" id="adminPasswordInput" placeholder="管理者パスワード"
+              onkeydown="if(event.key==='Enter') adminLogin()">
+            <button onclick="adminLogin()">入室</button>
+          </div>
+          <p class="text-muted mt-8" id="adminLoginError" style="color:#ef4444"></p>
+        </div>
+      </div>
+
       <!-- 管理者用投票パネル -->
+      <div id="adminPanel" class="hidden"></div>
       <div id="voteAdminPanel" class="admin-section hidden">
         <div class="admin-badge">管理者メニュー（日程投票）</div>
 
@@ -877,12 +891,18 @@
     function voteMemberLogin() {
       const input = document.getElementById('voteMemberPasswordInput').value;
       const errEl = document.getElementById('voteMemberLoginError');
-      if (MEMBER_CODES.has(input)) {
+      if (ADMIN_CODES.has(input)) {
+        localStorage.setItem('skipf_admin', 'true');
+        errEl.textContent = '';
+        checkVotePeriod();
+        checkAccessPeriod();
+        checkMorningAccessPeriod();
+      } else if (MEMBER_CODES.has(input)) {
         localStorage.setItem('skipf_member', 'true');
         errEl.textContent = '';
-        checkVotePeriod();        // 投票フォームを表示
-        checkAccessPeriod();      // 夜グルコンタブも同期
-        checkMorningAccessPeriod(); // 昼グルコンタブも同期
+        checkVotePeriod();
+        checkAccessPeriod();
+        checkMorningAccessPeriod();
       } else {
         errEl.textContent = 'パスワードが違います';
       }
