@@ -496,47 +496,27 @@
       <div id="voteForm" class="hidden">
 
         <div class="card">
-          <div class="card-title">&#127358; 翌月グルコン 希望日程を入力</div>
-          <p style="font-size:0.82rem;color:var(--color-accent2);background:var(--color-theme);border-radius:8px;padding:8px 12px;margin-bottom:12px;line-height:1.7">
-            &#128274; 日程投票は匿名投票となるのでご安心ください。<br>
-            報告が必要な方は、ひとことコメント欄にお名前も添えてご入力ください。
+          <div class="card-title">&#127358; 翌月グルコン 希望日程を投票</div>
+          <p style="font-size:0.82rem;color:var(--color-accent2);background:var(--color-theme);border-radius:8px;padding:8px 12px;margin-bottom:16px;line-height:1.7">
+            &#128274; 日程投票は匿名投票です。<br>
+            報告が必要な方は、コメント欄にお名前を添えてください。
           </p>
-          <p class="text-muted" style="margin-bottom:12px">
-            ○：参加できる（水色）<br>
-            △：たぶん参加できる（黄色）<br>
-            ×：NG（グレー・デフォルト）
+          <p class="text-muted" style="margin-bottom:16px">
+            ○：参加できる　△：たぶん参加できる　×：NG（タップで切り替え）
           </p>
 
-          <div class="vote-grid-wrapper">
-            <div class="vote-grid" id="voteGrid"><!-- JS で生成 --></div>
+          <!-- 候補日リスト（JSで生成） -->
+          <div id="candidatesList">
+            <p class="text-muted">日程候補が設定されていません</p>
           </div>
 
-          <div class="field" style="margin-top:16px">
+          <div class="field" style="margin-top:20px">
             <label>ひとことコメント（任意）</label>
             <input type="text" id="voteComment" placeholder="例：よろしくお願いします！SkipFちゃん">
-            <p class="text-muted" style="margin-top:4px">最後にお名前を入れてください（例：SkipFちゃん）</p>
-          </div>
-
-          <div class="field">
-            <label>誕生日パスワード（4桁数字）</label>
-            <input type="text" id="voteBirthdayPw" maxlength="4" placeholder="例：0423"
-              style="width:120px;padding:9px 13px;border:1.5px solid var(--color-border);border-radius:8px;font-family:var(--font-main);font-size:0.95rem;outline:none;">
-            <p class="text-muted" style="margin-top:4px">入力を後から編集するときに使います</p>
           </div>
 
           <button class="btn-primary" id="voteSubmitBtn" onclick="submitVote()">送信する</button>
           <p class="text-muted mt-8" id="voteSubmitMsg"></p>
-        </div>
-
-        <div class="card">
-          <div class="card-title">&#9998; 自分の入力を編集</div>
-          <p class="text-muted">誕生日パスワードを入力して「編集」を押すと、過去の入力を修正できます</p>
-          <div class="login-row" style="margin-top:8px">
-            <input type="text" id="voteEditPw" maxlength="4" placeholder="誕生日4桁"
-              style="width:100px;padding:9px 13px;border:1.5px solid var(--color-border);border-radius:8px;font-family:var(--font-main);font-size:0.95rem;outline:none;">
-            <button onclick="loadMyVote()">編集</button>
-          </div>
-          <p class="text-muted mt-8" id="voteEditMsg"></p>
         </div>
 
         <div class="card">
@@ -566,22 +546,24 @@
       <div id="voteAdminPanel" class="admin-section hidden">
         <div class="admin-badge">管理者メニュー（日程投票）</div>
 
-        <!-- 参加者の回答一覧（誰がどのスロットを入れたか・管理者のみ） -->
-        <div id="voteAdminEntryList" style="margin-bottom:16px">
-          <div class="card-title">参加者の回答一覧（運営のみ表示）</div>
-          <div id="voteAdminEntryListContent" class="text-muted">（なし）</div>
+        <!-- 候補日設定 -->
+        <div style="margin-bottom:20px">
+          <div class="card-title">日程候補を設定</div>
+          <p class="text-muted" style="margin-bottom:8px">1行に1候補ずつ入力してください（改行区切り）</p>
+          <textarea id="candidatesInput" rows="6"
+            style="width:100%;padding:10px 13px;border:1.5px solid var(--color-border);border-radius:10px;font-family:var(--font-main);font-size:0.95rem;outline:none;resize:vertical;box-sizing:border-box;"
+            placeholder="例：
+7/5(土) 20:00〜
+7/12(土) 20:00〜
+7/19(土) 20:00〜"></textarea>
+          <button class="btn-primary" style="margin-top:8px" onclick="saveCandidates()">候補日を保存</button>
+          <p class="text-muted mt-8" id="candidatesSavedMsg"></p>
         </div>
 
-        <div style="margin-bottom:16px">
-          <div class="card-title">
-            投票集計（匿名）
-            <button onclick="setVoteFilter('all')"   id="filterAll"   style="margin-left:8px;padding:2px 10px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-accent2);color:#fff;font-size:0.72rem;cursor:pointer;">全時間帯</button>
-            <button onclick="setVoteFilter('day')"   id="filterDay"   style="padding:2px 10px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-white);font-size:0.72rem;cursor:pointer;">昼帯(9-15)</button>
-            <button onclick="setVoteFilter('night')" id="filterNight" style="padding:2px 10px;border-radius:12px;border:1px solid var(--color-border);background:var(--color-white);font-size:0.72rem;cursor:pointer;">夜帯(20-24)</button>
-          </div>
-          <div class="vote-grid-wrapper" style="margin-top:8px">
-            <div class="vote-grid" id="voteHeatmap"><!-- JS で生成 --></div>
-          </div>
+        <!-- 参加者の回答一覧（誰がどのスロットを入れたか・管理者のみ） -->
+        <div id="voteAdminEntryList" style="margin-bottom:16px">
+          <div class="card-title">投票集計（運営のみ表示）</div>
+          <div id="voteAdminEntryListContent" class="text-muted">（なし）</div>
         </div>
 
         <div style="margin-bottom:16px">
@@ -606,7 +588,7 @@
         <!-- 月次リセット -->
         <div style="margin-top:24px;border-top:2px dashed #fca5a5;padding-top:16px">
           <div class="card-title" style="color:#b91c1c">⚠️ 月次リセット</div>
-          <p class="text-muted" style="margin-bottom:10px">翌月分の投票データ（参加者の回答・日程決定）をすべて削除します。<br>毎月、参加者に入力してもらう前に実行してください。</p>
+          <p class="text-muted" style="margin-bottom:10px">翌月分の投票データをすべて削除します。毎月、参加者に入力してもらう前に実行してください。</p>
           <button class="btn-secondary" style="border-color:#ef4444;color:#b91c1c;" onclick="confirmResetVote()">投票データをリセット</button>
           <p class="text-muted mt-8" id="voteResetMsg"></p>
         </div>
@@ -703,8 +685,7 @@
       if (isAdminLoggedIn()) {
         hide(voteLoginArea); hide(voteOut);
         show(voteForm); show(voteAdm);
-        if (!document.querySelector('#voteGrid .vote-cell')) buildVoteGrid('voteGrid', false);
-        if (!document.querySelector('#voteHeatmap .vote-cell')) buildVoteGrid('voteHeatmap', true);
+        renderCandidates();
         renderVoteAdminEntryList();
         return;
       }
@@ -718,7 +699,7 @@
       // ログイン済みメンバー → 投票フォームを表示
       hide(voteLoginArea); hide(voteOut); hide(voteAdm);
       show(voteForm);
-      if (!document.querySelector('#voteGrid .vote-cell')) buildVoteGrid('voteGrid', false);
+      renderCandidates();
     }
 
     // ══════════════════════════════════════════
@@ -856,12 +837,6 @@
       if (currentEvent && currentEvent.date) {
         dateEl.textContent  = formatEventTitle(currentEvent.date, currentEvent.startTime);
         badgeEl.textContent = formatDeadlineBadge(currentEvent.deadline);
-        if (isAdminLoggedIn()) {
-          const di = document.getElementById('settingDate');
-          const ti = document.getElementById('settingStartTime');
-          if (di && !di.value) di.value = currentEvent.date || '';
-          if (ti && !ti.value) ti.value = currentEvent.startTime || '';
-        }
       } else {
         dateEl.textContent  = '—';
         badgeEl.textContent = '設定待ち';
@@ -926,12 +901,6 @@
         if (_alf1) _alf1.classList.add('hidden');
         if (_alp1) _alp1.classList.remove('hidden');
         errEl.textContent = '';
-        if (currentEvent) {
-          const di = document.getElementById('settingDate');
-          const ti = document.getElementById('settingStartTime');
-          if (di) di.value = currentEvent.date || '';
-          if (ti) ti.value = currentEvent.startTime || '';
-        }
         checkAccessPeriod();
         checkVotePeriod();
         checkEveningTemplateButton();
@@ -1195,43 +1164,6 @@
       }
     }
 
-    // ══════════════════════════════════════════
-    // Task 10: 管理者パネル - グルコン設定・参加者一覧
-    // ══════════════════════════════════════════
-    async function saveEventSettings() {
-      const dateVal = document.getElementById('settingDate').value;
-      const timeVal = document.getElementById('settingStartTime').value.trim();
-      const savedEl = document.getElementById('settingSaved');
-
-      if (!dateVal || !timeVal) {
-        savedEl.textContent = '日付と開始時間を入力してください';
-        savedEl.style.color = '#ef4444';
-        return;
-      }
-
-      const eventDate    = new Date(dateVal + 'T00:00:00');
-      const openDate     = new Date(eventDate);
-      openDate.setDate(openDate.getDate() - 3);
-      const openDateStr  = openDate.toISOString().slice(0, 10);
-      const deadlineDate = new Date(eventDate);
-      deadlineDate.setDate(deadlineDate.getDate() - 1);
-      const deadlineStr  = deadlineDate.toISOString().slice(0, 10) + 'T23:59';
-
-      try {
-        await db.ref('/skipf-gurucon/event').set({
-          date: dateVal, startTime: timeVal,
-          openDate: openDateStr, deadline: deadlineStr
-        });
-        savedEl.textContent =
-          '保存しました（開放：' + openDateStr + '　締切：' + deadlineStr.replace('T', ' ') + '）';
-        savedEl.style.color = '#16a34a';
-      } catch (err) {
-        console.error('saveEventSettings error:', err);
-        savedEl.textContent = '保存に失敗しました';
-        savedEl.style.color = '#ef4444';
-      }
-    }
-
     function renderAdminSubmissionList() {
       const listEl  = document.getElementById('adminSubmissionList');
       const countEl = document.getElementById('adminCount');
@@ -1419,25 +1351,102 @@
     // ══════════════════════════════════════════
     // 日程投票：状態変数・Firebase購読
     // ══════════════════════════════════════════
-    let voteData   = {};      // { [id]: { comment, password, slots, submittedAt } }
-    let mySlots    = {};      // { [dayStr]: { [hourStr]: 'o'|'d' } }
-    let myVoteId   = null;    // 編集中のエントリID
+    let voteData    = {};      // { [id]: { comment, votes, submittedAt } }
+    let candidates  = [];      // ["7/5(土) 20:00〜", ...]
+    let myVotes     = [];      // ['o','x','d',...] インデックスは candidates に対応
+    let myVoteId    = null;    // 再送信時のエントリID（localStorage管理）
     let voteFilter = 'all';   // 'all'|'day'|'night'
 
     const VOTE_HOURS = [9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+
+    // 候補日のリアルタイム購読
+    db.ref('/skipf-gurucon/candidates').on('value', snap => {
+      candidates = snap.val() || [];
+      if (!Array.isArray(candidates)) candidates = Object.values(candidates);
+      renderCandidates();
+      renderVoteAggregate();
+      renderVoteAdminEntryList();
+      // 管理者テキストエリアに現在の候補日を反映
+      const ta = document.getElementById('candidatesInput');
+      if (ta && document.activeElement !== ta) ta.value = candidates.join('\n');
+    });
 
     // 投票データのリアルタイム購読
     db.ref('/skipf-gurucon/vote/' + getNextMonthKey() + '/entries').on('value', snap => {
       voteData = snap.val() || {};
       renderVoteAggregate();
       renderVoteComments();
-      renderVoteAdminEntryList(); // 管理者向け：誰がどのスロットを入れたか
+      renderVoteAdminEntryList();
     });
 
     // 投票結果（日程発表）の購読
     db.ref('/skipf-gurucon/vote/' + getNextMonthKey() + '/result').on('value', snap => {
       renderAnnouncementBanner(snap.val());
     });
+
+    // ══════════════════════════════════════════
+    // 候補日リスト表示（調整さん形式）
+    // ══════════════════════════════════════════
+    function renderCandidates() {
+      const listEl = document.getElementById('candidatesList');
+      if (!listEl) return;
+      while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
+
+      if (!candidates || candidates.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted';
+        p.textContent = '日程候補が設定されていません';
+        listEl.appendChild(p);
+        return;
+      }
+
+      while (myVotes.length < candidates.length) myVotes.push('x');
+
+      candidates.forEach((label, idx) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--color-border)';
+
+        const labelEl = document.createElement('span');
+        labelEl.style.cssText = 'flex:1;font-size:0.95rem';
+        labelEl.textContent = label;
+
+        const makeBtn = (state, symbol, activeColor) => {
+          const btn = document.createElement('button');
+          btn.dataset.idx = idx;
+          btn.dataset.state = state;
+          btn.textContent = symbol;
+          const isActive = myVotes[idx] === state;
+          btn.style.cssText = 'width:44px;height:44px;border-radius:50%;border:2px solid ' + (isActive ? activeColor : 'var(--color-border)') + ';background:' + (isActive ? activeColor : 'var(--color-white)') + ';color:' + (isActive ? '#fff' : 'var(--color-text)') + ';font-size:1.1rem;cursor:pointer;font-family:var(--font-main);transition:all 0.15s';
+          btn.onclick = () => { myVotes[idx] = state; renderCandidates(); };
+          return btn;
+        };
+
+        row.appendChild(labelEl);
+        row.appendChild(makeBtn('o', '○', '#3995a3'));
+        row.appendChild(makeBtn('d', '△', '#d4a800'));
+        row.appendChild(makeBtn('x', '×', '#aaa'));
+        listEl.appendChild(row);
+      });
+    }
+
+    // ══════════════════════════════════════════
+    // 候補日保存（管理者）
+    // ══════════════════════════════════════════
+    async function saveCandidates() {
+      const ta    = document.getElementById('candidatesInput');
+      const msgEl = document.getElementById('candidatesSavedMsg');
+      const lines = ta.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length === 0) {
+        msgEl.textContent = '候補日を1行以上入力してください'; msgEl.style.color = '#ef4444'; return;
+      }
+      try {
+        await db.ref('/skipf-gurucon/candidates').set(lines);
+        await db.ref('/skipf-gurucon/vote/' + getNextMonthKey() + '/entries').remove();
+        msgEl.textContent = '保存しました（' + lines.length + '件）'; msgEl.style.color = '#16a34a';
+      } catch (err) {
+        msgEl.textContent = '保存に失敗しました'; msgEl.style.color = '#ef4444';
+      }
+    }
 
     // ══════════════════════════════════════════
     // タイムライングリッド生成
@@ -1511,8 +1520,7 @@
             countSpan.textContent = '';
             cell.appendChild(countSpan);
 
-            const state = (mySlots[dayStr] && mySlots[dayStr][hourStr]) || 'x';
-            applyCellState(cell, state);
+            applyCellState(cell, 'x');
           }
           container.appendChild(cell);
         });
@@ -1533,76 +1541,45 @@
       }
     }
 
-    // ══════════════════════════════════════════
-    // スロットトグル（×→空き→×）
-    // ══════════════════════════════════════════
-    function toggleSlot(dayStr, hourStr) {
-      if (!mySlots[dayStr]) mySlots[dayStr] = {};
-      const current = mySlots[dayStr][hourStr] || 'x';
-      const next    = current === 'x' ? 'o' : current === 'o' ? 'd' : 'x';
-      if (next === 'x') {
-        delete mySlots[dayStr][hourStr];
-        if (Object.keys(mySlots[dayStr]).length === 0) delete mySlots[dayStr];
-      } else {
-        mySlots[dayStr][hourStr] = next;
-      }
-      const cell = document.getElementById('vc-' + dayStr + '-' + hourStr);
-      if (cell) applyCellState(cell, next);
-    }
-
-    function reflectMySlotsOnGrid() {
-      const totalDays = getNextMonthDays();
-      for (let d = 1; d <= totalDays; d++) {
-        const dayStr = String(d).padStart(2, '0');
-        VOTE_HOURS.forEach(h => {
-          const hourStr = String(h).padStart(2, '0');
-          const state   = (mySlots[dayStr] && mySlots[dayStr][hourStr]) || 'x';
-          const cell    = document.getElementById('vc-' + dayStr + '-' + hourStr);
-          if (cell) applyCellState(cell, state);
-        });
-      }
-    }
 
     // ══════════════════════════════════════════
     // 投票送信
     // ══════════════════════════════════════════
     async function submitVote() {
       const comment = document.getElementById('voteComment').value.trim();
-      const pw      = document.getElementById('voteBirthdayPw').value.trim();
-      const msgEl   = document.getElementById('voteSubmitMsg');
-      const btn     = document.getElementById('voteSubmitBtn');
+      const msgEl = document.getElementById('voteSubmitMsg');
+      const btn   = document.getElementById('voteSubmitBtn');
 
-      if (!pw || pw.length !== 4 || !/^\d{4}$/.test(pw)) {
-        msgEl.textContent = '誕生日パスワードは4桁の数字で入力してください';
+      const hasVote = myVotes.some(v => v !== 'x');
+      if (!hasVote && !comment) {
+        msgEl.textContent = '少なくとも1つ○か△を選んでください';
         msgEl.style.color = '#ef4444'; return;
       }
-      if (Object.keys(mySlots).length === 0 && !comment) {
-        msgEl.textContent = '希望スロットかコメントを入力してください';
+      if (candidates.length === 0) {
+        msgEl.textContent = '候補日が設定されていません';
         msgEl.style.color = '#ef4444'; return;
       }
 
       btn.disabled    = true;
       btn.textContent = '送信中...';
 
+      // LocalStorage でデバイスIDを管理（同デバイスからの再送信に上書き）
+      let deviceId = localStorage.getItem('skipf_vote_device_id');
+      if (!deviceId) {
+        deviceId = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('skipf_vote_device_id', deviceId);
+      }
+
       const monthKey = getNextMonthKey();
       const entry = {
         comment:     comment,
-        password:    pw,
-        slots:       mySlots,
+        votes:       myVotes.slice(0, candidates.length),
         submittedAt: Date.now()
       };
 
       try {
-        if (myVoteId) {
-          await db.ref('/skipf-gurucon/vote/' + monthKey + '/entries/' + myVoteId).set(entry);
-        } else {
-          await db.ref('/skipf-gurucon/vote/' + monthKey + '/entries').push().set(entry);
-        }
-        myVoteId = null;
-        mySlots  = {};
-        reflectMySlotsOnGrid();
-        document.getElementById('voteComment').value    = '';
-        document.getElementById('voteBirthdayPw').value = '';
+        await db.ref('/skipf-gurucon/vote/' + monthKey + '/entries/' + deviceId).set(entry);
+        document.getElementById('voteComment').value = '';
         msgEl.textContent = '送信しました！ありがとうございます';
         msgEl.style.color = '#16a34a';
         btn.textContent   = '送信しました！';
@@ -1617,118 +1594,10 @@
     }
 
     // ══════════════════════════════════════════
-    // 投票編集（誕生日PWでロード）
-    // ══════════════════════════════════════════
-    function loadMyVote() {
-      const pw    = document.getElementById('voteEditPw').value.trim();
-      const msgEl = document.getElementById('voteEditMsg');
-
-      if (!pw || pw.length !== 4 || !/^\d{4}$/.test(pw)) {
-        msgEl.textContent = '4桁の数字を入力してください';
-        msgEl.style.color = '#ef4444'; return;
-      }
-
-      const found = Object.entries(voteData).find(([id, e]) => e.password === pw);
-      if (!found) {
-        msgEl.textContent = '該当するデータが見つかりませんでした';
-        msgEl.style.color = '#ef4444'; return;
-      }
-
-      const [id, entry] = found;
-      myVoteId = id;
-      mySlots  = entry.slots ? JSON.parse(JSON.stringify(entry.slots)) : {};
-      document.getElementById('voteComment').value    = entry.comment || '';
-      document.getElementById('voteBirthdayPw').value = entry.password || '';
-      reflectMySlotsOnGrid();
-      msgEl.textContent = '読み込みました。修正後に「送信する」を押してください';
-      msgEl.style.color = '#16a34a';
-      document.getElementById('voteEditPw').value = '';
-    }
-
-    // ══════════════════════════════════════════
     // 投票集計（匿名・リアルタイム）
     // ══════════════════════════════════════════
-    function calcAggregateCounts() {
-      const counts = {};
-      Object.values(voteData).forEach(entry => {
-        if (!entry.slots) return;
-        Object.entries(entry.slots).forEach(([day, hours]) => {
-          if (!counts[day]) counts[day] = {};
-          Object.entries(hours).forEach(([hour, state]) => {
-            if (state === 'o' || state === 'd') {
-              counts[day][hour] = (counts[day][hour] || 0) + 1;
-            }
-          });
-        });
-      });
-      return counts;
-    }
-
     function renderVoteAggregate() {
-      const counts    = calcAggregateCounts();
-      const totalDays = getNextMonthDays();
-
-      // 通常グリッドの集計数バッジ更新
-      for (let d = 1; d <= totalDays; d++) {
-        const dayStr = String(d).padStart(2, '0');
-        VOTE_HOURS.forEach(h => {
-          const hourStr   = String(h).padStart(2, '0');
-          const cell      = document.getElementById('vc-' + dayStr + '-' + hourStr);
-          if (!cell) return;
-          const count     = (counts[dayStr] && counts[dayStr][hourStr]) || 0;
-          const countSpan = cell.querySelector('.cell-count');
-          if (countSpan) countSpan.textContent = count > 0 ? count : '';
-        });
-      }
-
-      renderVoteHeatmap(counts);
-    }
-
-    function renderVoteHeatmap(counts) {
-      const totalDays = getNextMonthDays();
-      const allCounts = Object.values(counts).flatMap(h => Object.values(h));
-      const maxCount  = allCounts.length > 0 ? Math.max(1, ...allCounts) : 1;
-
-      for (let d = 1; d <= totalDays; d++) {
-        const dayStr = String(d).padStart(2, '0');
-        VOTE_HOURS.forEach(h => {
-          const hourStr = String(h).padStart(2, '0');
-          const cell    = document.getElementById('hm-' + dayStr + '-' + hourStr);
-          if (!cell) return;
-
-          // フィルタ適用
-          const skip = (voteFilter === 'day'   && (h < 9  || h > 15))
-                    || (voteFilter === 'night' && (h < 20 || h > 24));
-          if (skip) {
-            cell.className = 'vote-cell heatmap-cell-0';
-            cell.style.opacity = '0.3';
-            const cs = cell.querySelector('span');
-            if (cs) cs.textContent = '';
-            return;
-          }
-          cell.style.opacity = '1';
-
-          const count = (counts[dayStr] && counts[dayStr][hourStr]) || 0;
-          const level = count === 0 ? 0 : Math.min(5, Math.ceil(count / maxCount * 5));
-          cell.className = 'vote-cell heatmap-cell-' + level;
-          const cs = cell.querySelector('span');
-          if (cs) {
-            cs.textContent = count > 0 ? count : '';
-            cs.style.color = level >= 3 ? '#fff' : 'var(--color-accent2)';
-          }
-        });
-      }
-    }
-
-    function setVoteFilter(filter) {
-      voteFilter = filter;
-      ['all', 'day', 'night'].forEach(f => {
-        const btn = document.getElementById('filter' + f.charAt(0).toUpperCase() + f.slice(1));
-        if (!btn) return;
-        btn.style.background = f === filter ? 'var(--color-accent2)' : 'var(--color-white)';
-        btn.style.color      = f === filter ? '#fff' : 'var(--color-text)';
-      });
-      renderVoteHeatmap(calcAggregateCounts());
+      // 候補日ごとの集計を candidatesList のラベル横に表示（管理者向けはrenderVoteAdminEntryListで別途表示）
     }
 
     // ══════════════════════════════════════════
@@ -2357,10 +2226,18 @@ ${thisMonth}月15日（${dow15}）まで
       if (!listEl) return;
       while (listEl.firstChild) listEl.removeChild(listEl.firstChild);
 
-      const entries = Object.entries(voteData)
-        .sort(([, a], [, b]) => (a.submittedAt || 0) - (b.submittedAt || 0));
+      if (candidates.length === 0) {
+        const p = document.createElement('p');
+        p.className = 'text-muted';
+        p.textContent = '候補日が設定されていません';
+        listEl.appendChild(p);
+        return;
+      }
 
-      if (entries.length === 0) {
+      const entries = Object.values(voteData);
+      const total   = entries.length;
+
+      if (total === 0) {
         const p = document.createElement('p');
         p.className = 'text-muted';
         p.textContent = 'まだ回答がありません';
@@ -2368,61 +2245,36 @@ ${thisMonth}月15日（${dow15}）まで
         return;
       }
 
-      const nextMonth = getNextMonthKey();
-      const [ny, nm]  = nextMonth.split('-').map(Number);
+      // 候補日ごとの集計
+      const header = document.createElement('p');
+      header.style.cssText = 'font-size:0.82rem;color:var(--color-muted);margin-bottom:10px';
+      header.textContent = '回答者数：' + total + '名';
+      listEl.appendChild(header);
 
-      entries.forEach(([id, entry], idx) => {
-        const item = document.createElement('div');
-        item.style.cssText = 'padding:8px 0;border-bottom:1px solid var(--color-border)';
+      candidates.forEach((label, idx) => {
+        const oCount = entries.filter(e => e.votes && e.votes[idx] === 'o').length;
+        const dCount = entries.filter(e => e.votes && e.votes[idx] === 'd').length;
+        const xCount = total - oCount - dCount;
 
-        // ── 名前（コメント） ──
-        const header = document.createElement('div');
-        header.style.cssText = 'font-size:0.85rem;font-weight:600;margin-bottom:4px;color:var(--color-text)';
-        header.textContent = (idx + 1) + '. ' + (entry.comment || '（コメントなし）');
-        item.appendChild(header);
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-border);flex-wrap:wrap';
 
-        // ── スロット集約 ──
-        if (entry.slots) {
-          const oSlots = [];
-          const dSlots = [];
+        const labelEl = document.createElement('span');
+        labelEl.style.cssText = 'flex:1;min-width:120px;font-size:0.9rem;font-weight:600';
+        labelEl.textContent = label;
 
-          // 日付順にソートして出力
-          const sortedDays = Object.keys(entry.slots).sort();
-          sortedDays.forEach(day => {
-            const dayNum  = parseInt(day, 10);
-            const dateObj = new Date(ny, nm - 1, dayNum);
-            const dayLabel = nm + '/' + dayNum + '(' + DOW_JA[dateObj.getDay()] + ')';
-            const hours = entry.slots[day];
-            const sortedHours = Object.keys(hours).sort((a, b) => parseInt(a) - parseInt(b));
-            sortedHours.forEach(hour => {
-              const state = hours[hour];
-              const label = dayLabel + ' ' + parseInt(hour, 10) + '時';
-              if (state === 'o') oSlots.push(label);
-              else if (state === 'd') dSlots.push(label);
-            });
-          });
+        const mkBadge = (symbol, count, color) => {
+          const s = document.createElement('span');
+          s.style.cssText = 'font-size:0.85rem;color:' + color + ';white-space:nowrap';
+          s.textContent = symbol + ' ' + count + '名';
+          return s;
+        };
 
-          if (oSlots.length > 0) {
-            const p = document.createElement('p');
-            p.style.cssText = 'font-size:0.78rem;color:#1a6fa8;margin:2px 0;line-height:1.6';
-            p.textContent = '○ ' + oSlots.join('　');
-            item.appendChild(p);
-          }
-          if (dSlots.length > 0) {
-            const p = document.createElement('p');
-            p.style.cssText = 'font-size:0.78rem;color:#8a7000;margin:2px 0;line-height:1.6';
-            p.textContent = '△ ' + dSlots.join('　');
-            item.appendChild(p);
-          }
-          if (oSlots.length === 0 && dSlots.length === 0) {
-            const p = document.createElement('p');
-            p.style.cssText = 'font-size:0.78rem;color:var(--color-muted);margin:2px 0';
-            p.textContent = 'スロット未入力';
-            item.appendChild(p);
-          }
-        }
-
-        listEl.appendChild(item);
+        row.appendChild(labelEl);
+        row.appendChild(mkBadge('○', oCount, '#1a6fa8'));
+        row.appendChild(mkBadge('△', dCount, '#8a7000'));
+        row.appendChild(mkBadge('×', xCount, '#888'));
+        listEl.appendChild(row);
       });
     }
 
