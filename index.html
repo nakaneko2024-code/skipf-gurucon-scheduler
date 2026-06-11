@@ -901,8 +901,10 @@
       const errEl = document.getElementById('adminLoginError');
       if (ADMIN_CODES.has(input)) {
         localStorage.setItem('skipf_admin', 'true');
-        document.getElementById('adminLoginForm').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
+        const _alf1 = document.getElementById('adminLoginForm');
+        const _alp1 = document.getElementById('adminPanel');
+        if (_alf1) _alf1.classList.add('hidden');
+        if (_alp1) _alp1.classList.remove('hidden');
         errEl.textContent = '';
         if (currentEvent) {
           const di = document.getElementById('settingDate');
@@ -922,8 +924,10 @@
 
     function adminLogout() {
       localStorage.removeItem('skipf_admin');
-      document.getElementById('adminLoginForm').classList.remove('hidden');
-      document.getElementById('adminPanel').classList.add('hidden');
+      const _alf2 = document.getElementById('adminLoginForm');
+      const _alp2 = document.getElementById('adminPanel');
+      if (_alf2) _alf2.classList.remove('hidden');
+      if (_alp2) _alp2.classList.add('hidden');
       checkAccessPeriod();
     }
 
@@ -934,6 +938,7 @@
       const participantArea = document.getElementById('participantArea');
       const outOfPeriodMsg  = document.getElementById('outOfPeriodMsg');
       const memberLoginArea = document.getElementById('memberLoginArea');
+      if (!participantArea || !outOfPeriodMsg || !memberLoginArea) return;
 
       function showParticipant()  { participantArea.classList.remove('hidden'); outOfPeriodMsg.classList.add('hidden'); memberLoginArea.classList.add('hidden'); }
       function showOutOfPeriod()  { participantArea.classList.add('hidden'); outOfPeriodMsg.classList.remove('hidden'); memberLoginArea.classList.add('hidden'); }
@@ -1075,8 +1080,10 @@
       const forecastArea = document.getElementById('forecastArea');
       const forecastIcon = document.getElementById('forecastIcon');
       const forecastText = document.getElementById('forecastText');
+      const inputNameEl  = document.getElementById('inputName');
+      if (!forecastArea || !inputNameEl) return;
 
-      const name  = document.getElementById('inputName').value.trim();
+      const name  = inputNameEl.value.trim();
       const start = document.getElementById('inputTimeStart').value.trim();
       const end   = document.getElementById('inputTimeEnd').value.trim();
 
@@ -1122,7 +1129,8 @@
       }
     }
 
-    document.getElementById('inputName').addEventListener('input', onFormInput);
+    const inputNameForListener = document.getElementById('inputName');
+    if (inputNameForListener) inputNameForListener.addEventListener('input', onFormInput);
 
     // ══════════════════════════════════════════
     // Task 9: フォーム送信（Firebase 書き込み）
@@ -2042,9 +2050,11 @@ ${thisMonth}月15日（${dow15}）まで
         checkMorningAccessPeriod();
         renderMorningAdminSubmissionList();
         checkMorningTemplateButton();
-        // 夜グルコンと投票タブの管理者パネルも同期
-        document.getElementById('adminLoginForm').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
+        // 投票タブの管理者パネルも同期
+        const _alf3 = document.getElementById('adminLoginForm');
+        const _alp3 = document.getElementById('adminPanel');
+        if (_alf3) _alf3.classList.add('hidden');
+        if (_alp3) _alp3.classList.remove('hidden');
         checkVotePeriod();
       } else {
         errEl.textContent = 'パスワードが違います';
